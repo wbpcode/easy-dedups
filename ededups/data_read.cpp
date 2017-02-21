@@ -48,6 +48,9 @@ void read_file(wstring path) {
 }
 
 int find_all_file(wstring path){
+	if (path[path.size() - 1] != L'\\') {
+		path = path + L"\\";
+	}
 	WIN32_FIND_DATA fileinfo;
 	wstring search_path = path + L"*.*";
 	HANDLE findend = FindFirstFile(search_path.c_str(), &fileinfo);
@@ -79,4 +82,10 @@ int find_all_file(wstring path){
 	}
 	FindClose(findend);
 	return 0;
+}
+
+void data_read() {
+	cout << "Reading start!!!" << endl;
+	find_all_file(backup_path);
+	cout << "Reading end!!!";
 }
