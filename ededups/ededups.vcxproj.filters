@@ -21,9 +21,15 @@
     <ClCompile Include="data_read.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
+    <ClCompile Include="ededups.cpp">
+      <Filter>源文件\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ededups.h">
+      <Filter>源文件\src</Filter>
+    </ClInclude>
+    <ClInclude Include="data_read.h">
       <Filter>源文件\src</Filter>
     </ClInclude>
   </ItemGroup>

@@ -140,8 +140,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="data_read.cpp" />
+    <ClCompile Include="ededups.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="data_read.h" />
     <ClInclude Include="ededups.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

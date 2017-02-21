@@ -1,6 +1,5 @@
-#include"ededups.h"
-
-#include<Windows.h>
+#include"data_read.h"
+#include<windows.h>
 
 
 void read_file(wstring path) {
@@ -80,5 +79,4 @@ int find_all_file(wstring path){
 	}
 	FindClose(findend);
 	return 0;
-	
 }

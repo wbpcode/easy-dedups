@@ -1,6 +1,4 @@
-
-#ifndef EDEDUPS_H
-#define EDEDUPS_H
+#pragma once
 
 #include<iostream>
 #include<fstream>
@@ -38,7 +36,7 @@ using std::ifstream;using std::ofstream;
 using std::istringstream; using std::ostringstream; using std::wistringstream; using std::wostringstream;
 using std::cout;using std::cin;using std::cerr;using std::endl;
 
-//工作路径，所有路径使用宽字符串对象wstring
+//工作路径，所有路径都使用宽字符串对象wstring
 wstring workpath;
 //数据处理序列
 vector<struct chunk*> read_seq;
@@ -49,7 +47,7 @@ struct chunk{
     int chunk_size;
     int chunk_flag;
     string chunk_data;
-	wstring file_path;
+	wstring file_path;//本来文件名应该存储在chunk_data中，但是路径的宽字符与string转换比较复杂
     long container_id;
 };
 
@@ -201,5 +199,3 @@ class container{
     }
 
 };
-
-#endif
