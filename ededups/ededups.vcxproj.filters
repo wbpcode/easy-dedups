@@ -24,12 +24,42 @@
     <ClCompile Include="ededups.cpp">
       <Filter>源文件\src</Filter>
     </ClCompile>
+    <ClCompile Include="data_chunk.cpp">
+      <Filter>源文件\src</Filter>
+    </ClCompile>
+    <ClCompile Include="data_hash.cpp">
+      <Filter>源文件\src</Filter>
+    </ClCompile>
+    <ClCompile Include="data_dedup.cpp">
+      <Filter>源文件\src</Filter>
+    </ClCompile>
+    <ClCompile Include="data_rewrite.cpp">
+      <Filter>源文件\src</Filter>
+    </ClCompile>
+    <ClCompile Include="data_filter.cpp">
+      <Filter>源文件\src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ededups.h">
       <Filter>源文件\src</Filter>
     </ClInclude>
     <ClInclude Include="data_read.h">
+      <Filter>源文件\src</Filter>
+    </ClInclude>
+    <ClInclude Include="data_chunk.h">
+      <Filter>源文件\src</Filter>
+    </ClInclude>
+    <ClInclude Include="data_hash.h">
+      <Filter>源文件\src</Filter>
+    </ClInclude>
+    <ClInclude Include="data_dedup.h">
+      <Filter>源文件\src</Filter>
+    </ClInclude>
+    <ClInclude Include="data_rewrite.h">
+      <Filter>源文件\src</Filter>
+    </ClInclude>
+    <ClInclude Include="data_filter.h">
       <Filter>源文件\src</Filter>
     </ClInclude>
   </ItemGroup>

@@ -10,7 +10,7 @@ void read_file(wstring path) {
 	cks->file_path = path;
 	cks->chunk_size = cks->file_path.size();
 	cks->container_id = TEMPORARY_ID;
-	read_seq.push_back(cks);
+	read_list.push_back(cks);
 	
 	ifstream filestream(path, ifstream::binary);
 	char* data_buffer = new char[READ_BLOCK_SIZE + 1];
@@ -22,7 +22,7 @@ void read_file(wstring path) {
 		ck->chunk_size = READ_BLOCK_SIZE;
 		ck->chunk_data = data_buffer;
 		ck->container_id = TEMPORARY_ID;
-		read_seq.push_back(ck);
+		read_list.push_back(ck);
 	}
 	int last_data_size = filestream.gcount();
 	if (last_data_size > 0) {
@@ -33,7 +33,7 @@ void read_file(wstring path) {
 		ck->chunk_size = last_data_size;
 		ck->chunk_data = data_buffer;
 		ck->container_id = TEMPORARY_ID;
-		read_seq.push_back(ck);
+		read_list.push_back(ck);
 	}
 	delete data_buffer;
 	filestream.close();
@@ -44,7 +44,7 @@ void read_file(wstring path) {
 	cke->file_path = path;
 	cke->chunk_size = cke->file_path.size();
 	cke->container_id = TEMPORARY_ID;
-	read_seq.push_back(cke);
+	read_list.push_back(cke);
 }
 
 int find_all_file(wstring path){

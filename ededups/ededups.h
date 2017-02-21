@@ -39,7 +39,12 @@ using std::cout;using std::cin;using std::cerr;using std::endl;
 //工作路径，所有路径都使用宽字符串对象wstring
 wstring workpath;
 //数据处理序列
-vector<struct chunk*> read_seq;
+vector<struct chunk*> read_list;
+vector<struct chunk*> chunk_list;
+vector<struct chunk*> hash_list;
+vector<struct chunk*> dedup_list;
+vector<struct chunk*> rewrite_list;
+vector<struct chunk*> filter_list;
 
 
 struct chunk{
