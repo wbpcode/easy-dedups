@@ -1,5 +1,4 @@
 #include"data_chunk.h"
-#include<windows.h>
 
 void data_chunk_fixed() {
 	while (TRUE) {

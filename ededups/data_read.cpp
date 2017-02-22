@@ -1,5 +1,4 @@
 #include"data_read.h"
-#include<windows.h>
 
 
 void read_file(wstring path) {

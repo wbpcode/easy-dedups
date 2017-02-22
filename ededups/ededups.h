@@ -8,6 +8,7 @@
 #include<list>
 #include<map>
 #include<cassert>
+#include<windows.h>
 
 //Data chunk flag
 #define CHUNK_UNIQUE 0x0000
