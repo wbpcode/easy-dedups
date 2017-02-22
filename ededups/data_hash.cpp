@@ -1,11 +1,11 @@
 #include"data_hash.h"
 
 
-string chunk_hash_compute(string chunk_data) {
+string hash_compute(string chunk_data) {
 	string data_fp = TEMPORARY_FP;
 	return data_fp;
 }
-void hash_compute() {
+void chunk_data_hash() {
 	while (TRUE) {
 		struct chunk* ck = chunk_list.front();
 		ck->chunk_fp = hash_compute(ck->chunk_data);
@@ -19,7 +19,7 @@ void hash_compute() {
 
 void data_hash() {
 	cout << "Hash start!!!" << endl;
-	hash_compute();
+	chunk_data_hash();
 	cout << "Hash end!!!" << endl;
 }
 
