@@ -1,6 +1,8 @@
 #pragma once
-#include"ededups.h"
 
-string hash_compute(string chunk_data);
+#include"ededups.h"
+#include"hash_sha.h"
+
+
 void chunk_data_hash();
 void data_hash();

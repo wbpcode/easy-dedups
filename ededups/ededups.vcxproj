@@ -146,6 +146,7 @@
     <ClCompile Include="data_read.cpp" />
     <ClCompile Include="data_rewrite.cpp" />
     <ClCompile Include="ededups.cpp" />
+    <ClCompile Include="hash_sha.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data_chunk.h" />
@@ -155,6 +156,7 @@
     <ClInclude Include="data_read.h" />
     <ClInclude Include="data_rewrite.h" />
     <ClInclude Include="ededups.h" />
+    <ClInclude Include="hash_sha.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
