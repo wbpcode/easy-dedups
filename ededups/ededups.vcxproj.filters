@@ -13,54 +13,57 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="源文件\src">
-      <UniqueIdentifier>{c27fcdce-9514-4409-b1d2-98f25b0ed9db}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="data_read.cpp">
-      <Filter>源文件\src</Filter>
-    </ClCompile>
-    <ClCompile Include="ededups.cpp">
-      <Filter>源文件\src</Filter>
-    </ClCompile>
     <ClCompile Include="data_chunk.cpp">
-      <Filter>源文件\src</Filter>
-    </ClCompile>
-    <ClCompile Include="data_hash.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="data_dedup.cpp">
-      <Filter>源文件\src</Filter>
-    </ClCompile>
-    <ClCompile Include="data_rewrite.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="data_filter.cpp">
-      <Filter>源文件\src</Filter>
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="data_hash.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="data_read.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="data_rewrite.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ededups.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="hash_sha.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ededups.h">
-      <Filter>源文件\src</Filter>
-    </ClInclude>
-    <ClInclude Include="data_read.h">
-      <Filter>源文件\src</Filter>
-    </ClInclude>
     <ClInclude Include="data_chunk.h">
-      <Filter>源文件\src</Filter>
-    </ClInclude>
-    <ClInclude Include="data_hash.h">
-      <Filter>源文件\src</Filter>
+      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="data_dedup.h">
-      <Filter>源文件\src</Filter>
-    </ClInclude>
-    <ClInclude Include="data_rewrite.h">
-      <Filter>源文件\src</Filter>
+      <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="data_filter.h">
-      <Filter>源文件\src</Filter>
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="data_hash.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="data_read.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="data_rewrite.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ededups.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="hash_sha.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
