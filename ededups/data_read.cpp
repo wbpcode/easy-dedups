@@ -6,11 +6,13 @@ void read_file(wstring path) {
 	cks->chunk_fp = TEMPORARY_FP;
 	assert(cks->chunk_fp.size() == CHUNK_FP_SIZE);
 	SET_CHUNK(cks, CHUNK_FILE_START);
-	int path_byte_size = WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, NULL, 0, NULL, 0);
-	char* path_buffer = new char[path_byte_size + 1];
 
-	cks->file_path = path;
-	cks->chunk_size = cks->file_path.size();
+	int path_byte_size = WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, NULL, 0, NULL, 0);
+	char *path_buffer =new char[path_byte_size];
+	WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, path_buffer, path_byte_size, NULL, 0);
+	cks->chunk_data = path_buffer;
+
+	cks->chunk_size = cks->chunk_data.size();
 	cks->container_id = TEMPORARY_ID;
 	read_list.push_back(cks);
 	
@@ -43,8 +45,11 @@ void read_file(wstring path) {
 	struct chunk* cke = new chunk;
 	cke->chunk_fp = TEMPORARY_FP;
 	SET_CHUNK(cke, CHUNK_FILE_END);
-	cke->file_path = path;
-	cke->chunk_size = cke->file_path.size();
+
+	cke->chunk_data = path_buffer;
+	delete path_buffer;
+
+	cke->chunk_size = cke->chunk_data.size();
 	cke->container_id = TEMPORARY_ID;
 	read_list.push_back(cke);
 }

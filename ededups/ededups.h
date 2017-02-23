@@ -61,7 +61,6 @@ struct chunk{
     int chunk_size;
     int chunk_flag;
     string chunk_data;
-	wstring file_path;
     long container_id;
 };
 
