@@ -18,55 +18,29 @@
 
 using std::string; 
 using std::cin; using std::cout; using std::endl;
+using std::hex;
 
 string data_padding(string data) {
 	//Get padding byte number
 	unsigned _int64 data_size = data.size(); 
-	unsigned int padding_size = (data_size / SUB_DATA_SIZE + 1)*SUB_DATA_SIZE - DATA_SIZE_LONG - data_size;
+	unsigned _int64 padding_size = (data_size / SUB_DATA_SIZE + 1)*SUB_DATA_SIZE - DATA_SIZE_LONG - data_size;
 	if (padding_size == 0) {
 		padding_size = SUB_DATA_SIZE;
 	}
-
-	//Prepare first byte for padding
-	unsigned char padding_first = 0x80;
+	//Prepare byte for padding(The longest padding bits are 512bits(64byte))
+	static char padding_first[] = { 0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 };
 
 	//Prepare last 8 byte for padding
-	unsigned char* padding_last_8 = (unsigned char*)(&data_size);
+	char* padding_last_8 = (char*)(&data_size);
 
-	//Allocate memory for data
-	char* mem_data = new char[data_size + padding_size + DATA_SIZE_LONG];
-	data.copy(mem_data, data_size);
-	unsigned char* c_data = (unsigned char*)mem_data;
+	//Insert and append(can do it just by one function,but here just for show how to use append and insert)
+	data.insert(data_size, &padding_first[0], padding_size);
+	data.append(padding_last_8, DATA_SIZE_LONG);
 
-	unsigned _int64 padding_pos = data_size;
-	unsigned _int64 padding_end = data_size + padding_size;
-	for (; padding_pos < padding_end; ++padding_pos) {
-		if (padding_pos == data_size) {
-			c_data[padding_pos] = padding_first;
-		}
-		else{
-			c_data[padding_pos] = 0;
-		}
-	}
-
-	padding_pos = padding_end;
-	padding_end = padding_end + DATA_SIZE_LONG;
-	for (; padding_pos < padding_end; ++padding_pos) {
-		c_data[padding_pos] = padding_last_8[DATA_SIZE_LONG - (padding_end - padding_pos)];
-	}
-
-	string str_data(padding_end, 0);
-	int pos = 0;
-	for (; pos < padding_end; ++pos) {
-		str_data[pos] = c_data[pos];
-	}
-
-	delete mem_data;
-
-	return str_data;
+	return data;
 }
-
-
 void md5_ff(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
 	unsigned _int32 sub_sub_data, unsigned _int32 constant_parameter, unsigned _int32 ring_lshift) {
 	*sub_buffer_a = *sub_buffer_b + ring_ls((*sub_buffer_a + md5_f(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + 
@@ -87,8 +61,6 @@ void md5_ii(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsign
 	*sub_buffer_a = *sub_buffer_b + ring_ls((*sub_buffer_a + md5_i(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + 
 		sub_sub_data + constant_parameter), ring_lshift);
 }
-
-
 string hash_md5(string data) {
 	string str_data = data_padding(data);
 	//Prepare the end buffer
@@ -113,19 +85,17 @@ string hash_md5(string data) {
 			}
 		}
 	}
-
 	static unsigned _int32 ring_lshift_parameter[4][16] = { 7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,
 									     5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,
 									     4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,
 									     6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21 };
 
-
-	char* sub_data = new char[SUB_DATA_SIZE];
+	char* sub_data=new char[SUB_DATA_SIZE];
 	int data_pos = 0;
-	while (str_data.copy(sub_data, SUB_DATA_SIZE, data_pos)==SUB_DATA_SIZE){
-		unsigned _int32 sub_sub_data[16]; unsigned char* unc_sub_data = (unsigned char*)sub_data;
+	while (str_data.copy(sub_data,SUB_DATA_SIZE,data_pos)==SUB_DATA_SIZE){
+		unsigned _int32 sub_sub_data[16];
 		for (int sub_sub_pos = 0; sub_sub_pos < 16; ++sub_sub_pos) {
-			sub_sub_data[sub_sub_pos] = *(unsigned _int32*)(&unc_sub_data[sub_sub_pos * 4]);
+			sub_sub_data[sub_sub_pos] = *(unsigned _int32*)(unsigned char*)(&sub_data[sub_sub_pos*4]);
 		}
 		sub_buffer_bk[0] = sub_buffer[0]; sub_buffer_bk[1] = sub_buffer[1];
 		sub_buffer_bk[2] = sub_buffer[2]; sub_buffer_bk[3] = sub_buffer[3];
@@ -160,20 +130,10 @@ string hash_md5(string data) {
 		sub_buffer[2] += sub_buffer_bk[2]; sub_buffer[3] += sub_buffer_bk[3];
 		data_pos += SUB_DATA_SIZE;
 	}
-
-	string md5_str(16, 0);
-	int f_buffer_pos = 0,str_pos=0;
-	for (; f_buffer_pos < 4; ++f_buffer_pos) {
-		unsigned char* c_sub_buffer = (unsigned char*)(&sub_buffer[f_buffer_pos]);
-		int s_buffer_pos = 0;
-		for(; s_buffer_pos < 4; ++s_buffer_pos) {
-			md5_str[str_pos] = c_sub_buffer[s_buffer_pos];
-			printf("%x\n", md5_str[str_pos]);
-			++str_pos;
-		}
+	string md5_str;
+	for (auto buffer_outcome : sub_buffer) {
+		md5_str.append((char*)(&buffer_outcome), 4);
 	}
-	
-	delete sub_data;
 
 	return md5_str;
 }
