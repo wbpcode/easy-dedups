@@ -27,9 +27,9 @@
 #define CHECK_CHUNK(ck,flag) (ck->chunk_flag & flag)
 
 //Preset value
-#define CHUNK_FP_SIZE 20
+#define CHUNK_FP_SIZE 40
 #define TEMPORARY_ID -1L
-#define TEMPORARY_FP "00000000000000000000"
+#define TEMPORARY_FP "0000000000000000000000000000000000000000"
 
 //Common identifier
 using std::string; using std::wstring; using std::map; using std::vector; using std::list;
