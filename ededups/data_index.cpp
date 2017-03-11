@@ -22,4 +22,5 @@ void finger_index_init(){
 
 		finger_index.index_map.insert(make_pair(fp, id));
 	}
+	assert(finger_index.index_map.size() == finger_index.index_num);
 }
