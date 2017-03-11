@@ -17,28 +17,28 @@ void read_file(wstring path) {
 	read_list.push_back(cks);
 	
 	ifstream filestream(path, ifstream::binary);
-	char* data_buffer = new char[READ_BLOCK_SIZE + 1];
+	char* data_buffer = new char[READ_BLOCK_SIZE];
 	while (filestream.read(data_buffer, READ_BLOCK_SIZE)) {
-		data_buffer[READ_BLOCK_SIZE] = 0;
+
 		struct chunk* ck = new chunk;
 		ck->chunk_fp = TEMPORARY_FP;
 		SET_CHUNK(ck, CHUNK_UNIQUE);
 		ck->chunk_size = READ_BLOCK_SIZE;
-		ck->chunk_data = data_buffer;
+		ck->chunk_data.assign(data_buffer, READ_BLOCK_SIZE);
 		ck->container_id = TEMPORARY_ID;
 		read_list.push_back(ck);
 	}
 	int last_data_size = filestream.gcount();
 	if (last_data_size > 0) {
-		data_buffer[last_data_size] = 0;
 		struct chunk* ck = new chunk;
 		ck->chunk_fp = TEMPORARY_FP;
 		SET_CHUNK(ck, CHUNK_UNIQUE);
 		ck->chunk_size = last_data_size;
-		ck->chunk_data = data_buffer;
+		ck->chunk_data.assign(data_buffer, last_data_size);
 		ck->container_id = TEMPORARY_ID;
 		read_list.push_back(ck);
 	}
+
 	delete data_buffer;
 	filestream.close();
 

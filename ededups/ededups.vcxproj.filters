@@ -39,6 +39,9 @@
     <ClCompile Include="hash_sha.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="data_index.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data_chunk.h">
@@ -63,6 +66,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="hash_sha.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="data_index.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
