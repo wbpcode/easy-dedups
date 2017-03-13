@@ -49,11 +49,11 @@ list<struct chunk*> chunk_list;
 list<struct chunk*> hash_list;
 list<struct chunk*> dedup_list;
 list<struct chunk*> rewrite_list;
-list<struct chunk*> filter_list;
 
 //*****CONFIG VARIABLES*****
 int READ_BLOCK_SIZE = 4194304;
 int READ_FIXED_CHUNK_SIZE = 8192;
+int CONTAINER_MAX_CHUNK_NUM = 1024;
 //*****CONFIG VARIABLES*****
 
 /*BASE DATA STUCTURE: CHUNK CHUNK_META CONTAINER*/
@@ -74,14 +74,25 @@ struct chunk_meta{
     _int64 container_id;
 };
 
+//Container id
+_int64 CONTAINER_COUNT;
 //Container class
 class container{
 
+public:
     _int64 container_id;
     int container_size;
     int container_chunk_num;
     map<string,struct chunk_meta*> container_chunk_meta_map;
     string container_data;
+
+	void container_init() {
+		container_id = CONTAINER_COUNT;
+		container_size = 0;
+		container_chunk_num = 0;
+		container_chunk_meta_map.clear();
+		container_data = "";
+	}
 
     //Add a chunk to container
     void add_chunk_to_container(struct chunk* ck){
@@ -125,6 +136,7 @@ class container{
 
 		return ck;
     }
+
     void write_container(){
 
 		wostringstream idstream;
@@ -150,7 +162,10 @@ class container{
         write_container_stream.write(container_data.c_str(),container_size);
 
         write_container_stream.close();
+
+		++CONTAINER_COUNT;
     }
+
     void read_container(_int64 id){
 
         container_id=id;
@@ -201,6 +216,7 @@ class container{
 
 		read_container_stream.close();
     }
+
     void delete_container(){
         auto chunk_meta_pair=container_chunk_meta_map.begin();
         auto chunk_meta_pair_end_flag=container_chunk_meta_map.end();
@@ -214,9 +230,11 @@ class container{
 
 
 
-class backup_info {
+class backup_recipe {
+public:
 
 	int backup_version;
+
 	wstring backup_path;
 
 	_int64 backup_chunk_num;
@@ -234,35 +252,36 @@ class backup_info {
 
 private:
 
-	void backup_count_init() {
+	void backup_version_init() {
+
 		if (workpath[workpath.size - 1] != L'\\') {
 			workpath = workpath + L'\\';
 		}
-		ifstream backup_count(workpath + L"backup_version_count", ifstream::binary);
-		backup_count.seekg(0, ifstream::end);
-		if (backup_count.tellg() > 0) {
-			backup_count.seekg(0, ifstream::beg);
+		ifstream backup_version_stream(workpath + L"backup_version_count", ifstream::binary);
+		backup_version_stream.seekg(0, ifstream::end);
+		if (backup_version_stream.tellg() > 0) {
+			backup_version_stream.seekg(0, ifstream::beg);
 			char count_buffer[sizeof(int)];
-			backup_count.read(count_buffer, sizeof(int));
+			backup_version_stream.read(count_buffer, sizeof(int));
 			backup_version = *(int*)(unsigned char*)(count_buffer)+1;
 
 		}
 		else {
 			backup_version = 0;
 		}
-		backup_count.close();
+		backup_version_stream.close();
 	}
 
-	void backup_count_close() {
+	void backup_version_close() {
 		if (workpath[workpath.size - 1] != L'\\') {
 			workpath = workpath + L'\\';
 		}
-		ofstream backup_count(workpath + L"backup_version_count", ifstream::binary);
-		backup_count.write((char*)(&backup_version), sizeof(int));
-		backup_count.close();
+		ofstream backup_version_stream(workpath + L"backup_version_count", ifstream::binary);
+		backup_version_stream.write((char*)(&backup_version), sizeof(int));
+		backup_version_stream.close();
 	}
 
-	void backup_recipe_init() {
+	void backup_recipe_stream_init() {
 
 		if (workpath[workpath.size - 1] != L'\\') {
 			workpath = workpath + L'\\';
@@ -289,25 +308,30 @@ private:
 		file_meta_stream.write(file_meta_buffer.str().c_str(), buffer_size);
 		file_meta_stream.clear();
 	}
-	void backup_recipe_close() {
+
+	void backup_recipe_stream_close() {
+
 		buffer_to_stream();
+
 		recipe_stream.close();
 		file_meta_stream.close();
+
 		recipe_buffer.clear();
 		file_meta_buffer.clear();
 	}
 
 public:
 
-	void backup_info_init() {
-		backup_count_init();
-		backup_recipe_init();
+	void backup_recipe_init() {
+		backup_version_init();
+		backup_recipe_stream_init();
 	}
-	void backup_info_close() {
-		backup_count_close();
-		backup_recipe_close();
+
+	void backup_recipe_close() {
+		backup_version_close();
+		backup_recipe_stream_close();
 	}
-	void file_recipe_add(struct chunk* ck) {
+	void backup_recipe_add(struct chunk* ck) {
 		static int file_chunk_num;
 		if (CHECK_CHUNK(ck, CHUNK_FILE_START)) {
 			file_meta_buffer.write((char*)(&ck->chunk_size), sizeof(int));
@@ -323,3 +347,84 @@ public:
 		}
 	}
 };
+backup_recipe mine_backup_recipe;
+
+class ededups_index {
+
+public:
+
+	map<string, _int64> finger_index;
+	map<string, _int64> finger_index_buffer;
+
+	void finger_index_init() {
+		if (workpath[workpath.size() - 1] != L'\\') {
+			workpath = workpath + L'\\';
+		}
+		ifstream index_stream(workpath + L"index", ifstream::binary);
+		char index_num[sizeof(_int64)];
+		index_stream.read(index_num, sizeof(_int64));
+		_int64 finger_index_num = *(_int64*)(index_num);
+		_int64 num = 0;
+		char fp_buffer[CHUNK_FP_SIZE];
+		char id_buffer[sizeof(_int64)];
+		string fp;
+		_int64 id;
+		for (; num < finger_index_num; ++num) {
+			index_stream.read(fp_buffer, CHUNK_FP_SIZE);
+			fp.assign(fp_buffer, CHUNK_FP_SIZE);
+
+			index_stream.read(id_buffer, sizeof(_int64));
+			id = *(_int64*)(id_buffer);
+
+			finger_index.insert(make_pair(fp, id));
+		}
+		assert(finger_index.size() == finger_index_num);
+
+		index_stream.close();
+	}
+
+	_int64 finger_index_check(struct chunk* ck) {
+		auto outcome = finger_index.find(ck->chunk_fp);
+		if (outcome != finger_index.end()) {
+			return outcome->second;
+		}
+		else {
+			return -1;
+		}
+	}
+
+	_int64 finger_index_buffer_check(struct chunk* ck) {
+		auto outcome = finger_index.find(ck->chunk_fp);
+		if (outcome != finger_index.end()) {
+			return outcome->second;
+		}
+		else {
+			return -1;
+		}
+	}
+
+	void finger_index_update() {
+		auto begin = finger_index_buffer.begin();
+		auto end = finger_index_buffer.end();
+		for (; begin != end; ++begin) {
+			finger_index.insert(*begin);
+		}
+	}
+	void finger_index_close() {
+		if (workpath[workpath.size() - 1] != L'\\') {
+			workpath = workpath + L'\\';
+		}
+		ofstream index_stream(workpath + L"index", ofstream::binary);
+		_int64 finger_index_num = finger_index.size();
+		index_stream.write((char*)(&finger_index_num), sizeof(_int64));
+		auto begin = finger_index.begin();
+		auto end = finger_index.end();
+		for (; begin != end; ++begin) {
+			index_stream.write(begin->first.c_str(), CHUNK_FP_SIZE);
+			index_stream.write((char*)(&begin->second), sizeof(_int64));
+		}
+
+		index_stream.close();
+	}
+};
+ededups_index mine_ededup_index;

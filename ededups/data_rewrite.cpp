@@ -1,7 +1,7 @@
 #include"data_rewrite.h"
 
 
-void chunk_data_rewrite() {
+void chunk_data_no_rewrite() {
 	while (TRUE) {
 		if (dedup_list.empty()) {
 			break;
@@ -21,6 +21,6 @@ void chunk_data_rewrite() {
 
 void data_rewrite() {
 	cout << "Rewrite start!!!" << endl;
-	chunk_data_rewrite();
+	chunk_data_no_rewrite();
 	cout << "Rewrite end!!!" << endl;
 }

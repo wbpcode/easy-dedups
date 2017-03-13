@@ -141,9 +141,8 @@
   <ItemGroup>
     <ClCompile Include="data_chunk.cpp" />
     <ClCompile Include="data_dedup.cpp" />
-    <ClCompile Include="data_filter.cpp" />
+    <ClCompile Include="data_write.cpp" />
     <ClCompile Include="data_hash.cpp" />
-    <ClCompile Include="data_index.cpp" />
     <ClCompile Include="data_read.cpp" />
     <ClCompile Include="data_rewrite.cpp" />
     <ClCompile Include="ededups.cpp" />
@@ -152,9 +151,8 @@
   <ItemGroup>
     <ClInclude Include="data_chunk.h" />
     <ClInclude Include="data_dedup.h" />
-    <ClInclude Include="data_filter.h" />
+    <ClInclude Include="data_write.h" />
     <ClInclude Include="data_hash.h" />
-    <ClInclude Include="data_index.h" />
     <ClInclude Include="data_read.h" />
     <ClInclude Include="data_rewrite.h" />
     <ClInclude Include="ededups.h" />

@@ -21,9 +21,6 @@
     <ClCompile Include="data_dedup.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="data_filter.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="data_hash.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -39,7 +36,7 @@
     <ClCompile Include="hash_sha.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="data_index.cpp">
+    <ClCompile Include="data_write.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -48,9 +45,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="data_dedup.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="data_filter.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="data_hash.h">
@@ -68,7 +62,7 @@
     <ClInclude Include="hash_sha.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="data_index.h">
+    <ClInclude Include="data_write.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
