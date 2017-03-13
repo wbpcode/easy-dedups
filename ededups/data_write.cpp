@@ -28,7 +28,9 @@ void chunk_data_write() {
 
 		if (CHECK_CHUNK(ck, CHUNK_UNIQUE) ||
 			CHECK_CHUNK(ck, CHUNK_FRAG) && (!CHECK_CHUNK(ck, CHUNK_REWRITE_DENY))) {
+
 			if (cnr.container_chunk_num < CONTAINER_MAX_CHUNK_NUM) {
+				ck->container_id = cnr.container_id;
 				cnr.add_chunk_to_container(ck);
 			}
 			else {
@@ -37,7 +39,13 @@ void chunk_data_write() {
 				cnr.write_container;
 				//re-init container for following chunk
 				cnr.container_init();
+
+				ck->container_id = cnr.container_id;
+				cnr.add_chunk_to_container(ck);
+
 			}
+			auto ckrecipe=mine_ededups_index.finger_index_buffer.find(ck->chunk_fp);
+			ckrecipe->second = ck->container_id;
 			if (CHECK_CHUNK(ck, CHUNK_UNIQUE)) {
 				mine_backup_recipe.backup_unique_num++;
 				mine_backup_recipe.backup_unique_size += ck->chunk_size;
@@ -47,9 +55,22 @@ void chunk_data_write() {
 			mine_backup_recipe.backup_chunk_num++;
 			mine_backup_recipe.backup_data_size += ck->chunk_size;
 		}
+		ck->container_id = mine_ededups_index.finger_index_buffer_check(ck);
 		mine_backup_recipe.backup_recipe_add(ck);
-		
+
+		rewrite_list.pop_front();
 	}
+	cnr.write_container();
+	cnr.container_init();
+
+	ofstream container_count_stream2(workpath + L"container_count", ofstream::binary);
+	ofstream container_count_stream2(workpath + L"container_count", ofstream::binary);
+	container_count_stream2.write((char*)(&CONTAINER_COUNT), sizeof(_int64));
+
+	mine_ededups_index.finger_index_update();
+	mine_ededups_index.finger_index_close();
+	mine_backup_recipe.backup_recipe_close();
+
 };
 
 void data_write() {

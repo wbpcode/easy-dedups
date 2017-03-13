@@ -427,4 +427,4 @@ public:
 		index_stream.close();
 	}
 };
-ededups_index mine_ededup_index;
+ededups_index mine_ededups_index;
