@@ -27,9 +27,6 @@
     <ClCompile Include="data_read.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="data_rewrite.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ededups.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -51,9 +48,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="data_read.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="data_rewrite.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ededups.h">

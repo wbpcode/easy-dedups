@@ -21,13 +21,12 @@ void chunk_data_write() {
 
 	cnr.container_init();
 	while (TRUE) {
-		if (rewrite_list.empty()) {
+		if (dedup_list.empty()) {
 			break;
 		}
-		struct chunk* ck = rewrite_list.front();
+		struct chunk* ck = dedup_list.front();
 
-		if (CHECK_CHUNK(ck, CHUNK_UNIQUE) ||
-			CHECK_CHUNK(ck, CHUNK_FRAG) && (!CHECK_CHUNK(ck, CHUNK_REWRITE_DENY))) {
+		if (CHECK_CHUNK(ck, CHUNK_UNIQUE)) {
 
 			if (cnr.container_chunk_num < CONTAINER_MAX_CHUNK_NUM) {
 				ck->container_id = cnr.container_id;
@@ -44,21 +43,25 @@ void chunk_data_write() {
 				cnr.add_chunk_to_container(ck);
 
 			}
-			auto ckrecipe=mine_ededups_index.finger_index_buffer.find(ck->chunk_fp);
-			ckrecipe->second = ck->container_id;
+
+			mine_ededups_index.finger_index_buffer[ck->chunk_fp]= ck->container_id;
+
 			if (CHECK_CHUNK(ck, CHUNK_UNIQUE)) {
 				mine_backup_recipe.backup_unique_num++;
 				mine_backup_recipe.backup_unique_size += ck->chunk_size;
 			}
 		}
+
 		if (!CHECK_CHUNK(ck, CHUNK_FILE_START) && !CHECK_CHUNK(ck, CHUNK_FILE_END)) {
 			mine_backup_recipe.backup_chunk_num++;
 			mine_backup_recipe.backup_data_size += ck->chunk_size;
 		}
+
 		ck->container_id = mine_ededups_index.finger_index_buffer_check(ck);
+
 		mine_backup_recipe.backup_recipe_add(ck);
 
-		rewrite_list.pop_front();
+		dedup_list.pop_front();
 	}
 	cnr.write_container();
 	cnr.container_init();

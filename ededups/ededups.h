@@ -13,8 +13,9 @@
 //Data chunk flag
 #define CHUNK_UNIQUE 0x0000
 #define CHUNK_DEDUP 0x0001
-#define CHUNK_FRAG 0x0002
-#define CHUNK_REWRITE_DENY 0x0004
+
+/*#define CHUNK_FRAG 0x0002
+#define CHUNK_REWRITE_DENY 0x0004*/
 
 //Special chunk flag
 #define CHUNK_FILE_START 0x0100
@@ -48,7 +49,7 @@ list<struct chunk*> read_list;
 list<struct chunk*> chunk_list;
 list<struct chunk*> hash_list;
 list<struct chunk*> dedup_list;
-list<struct chunk*> rewrite_list;
+//list<struct chunk*> rewrite_list;
 
 //*****CONFIG VARIABLES*****
 int READ_BLOCK_SIZE = 4194304;

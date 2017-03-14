@@ -144,7 +144,6 @@
     <ClCompile Include="data_write.cpp" />
     <ClCompile Include="data_hash.cpp" />
     <ClCompile Include="data_read.cpp" />
-    <ClCompile Include="data_rewrite.cpp" />
     <ClCompile Include="ededups.cpp" />
     <ClCompile Include="hash_sha.cpp" />
   </ItemGroup>
@@ -154,7 +153,6 @@
     <ClInclude Include="data_write.h" />
     <ClInclude Include="data_hash.h" />
     <ClInclude Include="data_read.h" />
-    <ClInclude Include="data_rewrite.h" />
     <ClInclude Include="ededups.h" />
     <ClInclude Include="hash_sha.h" />
   </ItemGroup>
