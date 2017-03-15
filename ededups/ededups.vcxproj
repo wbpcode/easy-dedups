@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="data_backup.cpp" />
     <ClCompile Include="data_chunk.cpp" />
     <ClCompile Include="data_dedup.cpp" />
     <ClCompile Include="data_write.cpp" />

@@ -36,6 +36,9 @@
     <ClCompile Include="data_write.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="data_backup.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="data_chunk.h">
