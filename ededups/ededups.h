@@ -64,13 +64,12 @@ struct chunk_meta{
 //Container
 struct container{
 	_int64 container_id;
-	_int64 CONTAINER_COUNT;
 	int container_size;
 	int container_chunk_num;
 	map<string, struct chunk_meta*> container_chunk_meta_map;
 	string container_data;
 	
-}
+};
 
 
 //container_set class
@@ -81,7 +80,8 @@ public:
 	wstring workpath;
 	list<struct container*> container_list;
 
-	void container_set_init_count() {
+	void container_set_init(wstring path) {
+		workpath = path;
 
 		if (workpath[workpath.size() - 1] != '\\') {
 			workpath += '\\';
@@ -134,7 +134,7 @@ public:
 			idstream.clear();
 			write_container_stream.close();
 
-
+			delete_container(cnr);
 			container_list.pop_front();
 		}
 	}
@@ -198,6 +198,9 @@ public:
 			delete chunk_meta_pair->second;
 		}
 		delete cnr;
+	}
+	void container_set_close() {
+		;
 	}
 };
 
@@ -334,6 +337,7 @@ private:
 		int buffer_size = recipe_buffer.tellg();
 		recipe_stream.write(recipe_buffer.str().c_str(), buffer_size);
 		recipe_buffer.clear();
+
 		file_meta_buffer.seekg(0, stringstream::end);
 		buffer_size = file_meta_buffer.tellg();
 		file_meta_stream.write(file_meta_buffer.str().c_str(), buffer_size);
@@ -353,7 +357,8 @@ private:
 
 public:
 
-	void backup_recipe_init() {
+	void backup_recipe_init(wstring path) {
+		workpath = path;
 		backup_version_init();
 		backup_recipe_stream_init();
 	}
@@ -387,7 +392,9 @@ public:
 	map<string, _int64> finger_index_buffer;
 	wstring workpath;
 
-	void finger_index_init() {
+	void finger_index_init(wstring path) {
+		workpath = path;
+
 		if (workpath[workpath.size() - 1] != L'\\') {
 			workpath = workpath + L'\\';
 		}

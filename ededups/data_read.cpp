@@ -92,8 +92,8 @@ int find_all_file(wstring path){
 	return 0;
 }
 
-void data_read() {
+void data_read(wstring path) {
 	cout << "Reading start!!!" << endl;
-	find_all_file(backup_path);
+	find_all_file(path);
 	cout << "Reading end!!!";
 }

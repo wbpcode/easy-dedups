@@ -139,7 +139,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="data_backup.cpp" />
     <ClCompile Include="data_chunk.cpp" />
     <ClCompile Include="data_dedup.cpp" />
     <ClCompile Include="data_write.cpp" />
@@ -149,7 +148,6 @@
     <ClCompile Include="hash_sha.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="data_backup.h" />
     <ClInclude Include="data_chunk.h" />
     <ClInclude Include="data_dedup.h" />
     <ClInclude Include="data_write.h" />
