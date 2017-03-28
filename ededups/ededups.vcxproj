@@ -149,6 +149,7 @@
     <ClCompile Include="hash_sha.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="data_backup.h" />
     <ClInclude Include="data_chunk.h" />
     <ClInclude Include="data_dedup.h" />
     <ClInclude Include="data_write.h" />

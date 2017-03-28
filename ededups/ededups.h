@@ -31,31 +31,17 @@
 #define CHUNK_FP_SIZE 40
 #define TEMPORARY_ID -1L
 #define TEMPORARY_FP "0000000000000000000000000000000000000000"
+#define READ_BLOCK_SIZE 4194304
+#define READ_FIXED_CHUNK_SIZE 8192
+#define CONTAINER_MAX_CHUNK_NUM 1024
+#define CONTAINER_SET_NUM 5
 
 //Common identifier
 using std::string; using std::wstring; using std::map; using std::vector; using std::list;
 using std::ifstream; using std::ofstream; using std::ios;
 using std::stringstream; using std::istringstream; using std::ostringstream; 
 using std::wistringstream; using std::wostringstream;
-using std::cout;using std::cin;using std::cerr;using std::endl;
-
-//Working path
-wstring workpath;
-wstring backup_path;
-wstring restore_path;
-
-//Data list 
-list<struct chunk*> read_list;
-list<struct chunk*> chunk_list;
-list<struct chunk*> hash_list;
-list<struct chunk*> dedup_list;
-//list<struct chunk*> rewrite_list;
-
-//*****CONFIG VARIABLES*****
-int READ_BLOCK_SIZE = 4194304;
-int READ_FIXED_CHUNK_SIZE = 8192;
-int CONTAINER_MAX_CHUNK_NUM = 1024;
-//*****CONFIG VARIABLES*****
+using std::cout; using std::cin; using std::wcout; using std::wcin; using std::cerr; using std::endl;
 
 /*BASE DATA STUCTURE: CHUNK CHUNK_META CONTAINER*/
 struct chunk{
@@ -75,99 +61,152 @@ struct chunk_meta{
     _int64 container_id;
 };
 
-//Container id
-_int64 CONTAINER_COUNT;
-//Container class
-class container{
+//Container
+struct container{
+	_int64 container_id;
+	_int64 CONTAINER_COUNT;
+	int container_size;
+	int container_chunk_num;
+	map<string, struct chunk_meta*> container_chunk_meta_map;
+	string container_data;
+	
+}
 
+
+//container_set class
+class container_set {
 public:
-    _int64 container_id;
-    int container_size;
-    int container_chunk_num;
-    map<string,struct chunk_meta*> container_chunk_meta_map;
-    string container_data;
+	_int64 global_container_count;
+	_int64 current_container_count;
+	wstring workpath;
+	list<struct container*> container_list;
 
-	void container_init() {
-		container_id = CONTAINER_COUNT;
-		container_size = 0;
-		container_chunk_num = 0;
-		container_chunk_meta_map.clear();
-		container_data = "";
+	void container_set_init_count() {
+
+		if (workpath[workpath.size() - 1] != '\\') {
+			workpath += '\\';
+		}
+		ifstream container_count_stream(workpath + L"container_count", ifstream::binary);
+		container_count_stream.seekg(0, ifstream::end);
+		if (container_count_stream.tellg() > 0) {
+			char container_count_buffer[sizeof(_int64)];
+			container_count_stream.read(container_count_buffer, sizeof(_int64));
+			global_container_count = *(_int64*)(container_count_buffer);
+		}
+		else {
+			global_container_count = 0;
+		}
+		container_count_stream.close();
+
+		current_container_count = 0;
 	}
 
-    //Add a chunk to container
-    void add_chunk_to_container(struct chunk* ck){
-        //Create a new chunk metadata and add it to container_chunk_meta_map
-        struct chunk_meta* ckmeta=new chunk_meta;
-        ckmeta->chunk_fp=ck->chunk_fp;
-        ckmeta->chunk_size=ck->chunk_size;
-        ckmeta->chunk_flag=ck->chunk_flag;
-        ckmeta->chunk_offset=container_size;
-        ckmeta->container_id=container_id; 
-        container_chunk_meta_map.insert(make_pair(ckmeta->chunk_fp,ckmeta));
-        //Update container attributes
-        container_size+=ck->chunk_size;
-        ++container_chunk_num;
-        container_data=container_data+ck->chunk_data;
-    }
-    //Check chunk if it is in this container
-    struct chunk_meta* check_chunk_in_container(struct chunk* ck){
-        auto chunk_meta_pair=container_chunk_meta_map.find(ck->chunk_fp);
-        if(chunk_meta_pair==container_chunk_meta_map.end()){
-            return NULL;
-        }else{
-            return chunk_meta_pair->second;
-        }
-    }
+	void write_container_set() {
+		while (TRUE){
+			if (container_list.empty()){
+				break;
+			}
+			auto cnr = container_list.front();
 
-    struct chunk* get_chunk_from_container(struct chunk* ck){
-        assert(ck->container_id==container_id);
-        auto chunk_meta_pair=container_chunk_meta_map.find(ck->chunk_fp);
-        if(chunk_meta_pair==container_chunk_meta_map.end()){
-			cerr << "Chunk " << ck->chunk_fp << " not in container " << container_id << " !!!" << endl;
-			return NULL;
-        }
+			//write data
+			wostringstream idstream;
+			idstream << cnr->container_id;
+			wstring idstring = idstream.str();
+			wstring path = workpath + L"containers/" + L"container" + idstring;
 
-		struct chunk_meta* ckmeta = chunk_meta_pair->second;
-		ck->chunk_fp = ckmeta->chunk_fp;
-		ck->chunk_size = ckmeta->chunk_size;
-		ck->chunk_flag = ckmeta->chunk_flag;
-		ck->chunk_data.assign(container_data, ckmeta->chunk_offset, ckmeta->chunk_size);
-		ck->container_id = ckmeta->container_id;
+			ofstream write_container_stream(path, ofstream::binary);
 
-		return ck;
-    }
+			write_container_stream.write((char*)(&cnr->container_id), sizeof(_int64));
+			write_container_stream.write((char*)(&cnr->container_size), sizeof(int));
+			write_container_stream.write((char*)(&cnr->container_chunk_num), sizeof(int));
 
-    void write_container(){
+			auto chunk_meta_pair = cnr->container_chunk_meta_map.begin();
+			auto chunk_meta_pair_end_flag = cnr->container_chunk_meta_map.end();
+			for (; chunk_meta_pair != chunk_meta_pair_end_flag; ++chunk_meta_pair) {
 
-		wostringstream idstream;
-		idstream << container_id;
-		wstring idstring = idstream.str();
-        wstring path=workpath+L"containers/"+L"container"+idstring;
+				write_container_stream.write(chunk_meta_pair->second->chunk_fp.c_str(), CHUNK_FP_SIZE);
+				write_container_stream.write((char*)(&chunk_meta_pair->second->chunk_size), sizeof(int));
+				write_container_stream.write((char*)(&chunk_meta_pair->second->chunk_offset), sizeof(int));
+			}
 
-        ofstream write_container_stream(path,ofstream::binary);
+			write_container_stream.write(cnr->container_data.c_str(), cnr->container_size);
 
-        write_container_stream.write((char*)(&container_id),sizeof(_int64));
-        write_container_stream.write((char*)(&container_size),sizeof(int));
-        write_container_stream.write((char*)(&container_chunk_num),sizeof(int));
+			idstream.clear();
+			write_container_stream.close();
 
-        auto chunk_meta_pair=container_chunk_meta_map.begin();
-        auto chunk_meta_pair_end_flag=container_chunk_meta_map.end();
-        for(;chunk_meta_pair!=chunk_meta_pair_end_flag;++chunk_meta_pair){
 
-            write_container_stream.write(chunk_meta_pair->second->chunk_fp.c_str(),CHUNK_FP_SIZE);
-            write_container_stream.write((char*)(&chunk_meta_pair->second->chunk_size),sizeof(int));
-            write_container_stream.write((char*)(&chunk_meta_pair->second->chunk_offset),sizeof(int)); 
-        }
+			container_list.pop_front();
+		}
+	}
+	void add_chunk_to_container_set(struct chunk* ck) {
 
-        write_container_stream.write(container_data.c_str(),container_size);
+		if (!container_list.empty()){
+			if (container_list.back()->container_chunk_num >= CONTAINER_MAX_CHUNK_NUM) {
 
-        write_container_stream.close();
+				auto newcn = new container;
+				newcn->container_id = global_container_count;
+				newcn->container_size = 0;
+				newcn->container_chunk_num = 0;
+				newcn->container_chunk_meta_map.clear();
+				newcn->container_data = "";
+				++global_container_count;
 
-		++CONTAINER_COUNT;
-    }
+				if (container_list.size() >= CONTAINER_SET_NUM) {
+					write_container_set();
+					assert(container_list.empty());
+				}
 
-    void read_container(_int64 id){
+				container_list.push_back(newcn);
+			}
+		}
+		else {
+			auto newcn = new container;
+			newcn->container_id = global_container_count;
+			newcn->container_size = 0;
+			newcn->container_chunk_num = 0;
+			newcn->container_chunk_meta_map.clear();
+			newcn->container_data = "";
+			++global_container_count;
+
+			container_list.push_back(newcn);
+		}
+
+		auto cnr = container_list.back();
+		//Create a new chunk metadata and add it to container_chunk_meta_map
+		struct chunk_meta* ckmeta = new chunk_meta;
+		ckmeta->chunk_fp = ck->chunk_fp;
+		ckmeta->chunk_size = ck->chunk_size;
+		ckmeta->chunk_flag = ck->chunk_flag;
+		ckmeta->chunk_offset = cnr->container_size;
+		ckmeta->container_id = cnr->container_id;
+		cnr->container_chunk_meta_map.insert(make_pair(ckmeta->chunk_fp, ckmeta));
+		//Update container attributes
+		cnr->container_size += ck->chunk_size;
+		cnr->container_chunk_num+=1;
+		cnr->container_data = cnr->container_data + ck->chunk_data;
+	}
+	struct chunk_meta* check_chunk_in_container_set(struct chunk* ck) {
+		;
+	}
+	struct chunk* get_chunk_from_container(struct chunk* ck) {
+		;
+	}
+	void delete_container(struct container* cnr) {
+		auto chunk_meta_pair = cnr->container_chunk_meta_map.begin();
+		auto chunk_meta_pair_end_flag = cnr->container_chunk_meta_map.end();
+		for (; chunk_meta_pair != chunk_meta_pair_end_flag; ++chunk_meta_pair) {
+			delete chunk_meta_pair->second;
+		}
+		delete cnr;
+	}
+};
+
+
+
+
+    
+
+    /*void read_container(_int64 id){
 
         container_id=id;
 		wostringstream idstream;
@@ -216,18 +255,8 @@ public:
         delete data_buffer;
 
 		read_container_stream.close();
-    }
+    }*/
 
-    void delete_container(){
-        auto chunk_meta_pair=container_chunk_meta_map.begin();
-        auto chunk_meta_pair_end_flag=container_chunk_meta_map.end();
-        for(;chunk_meta_pair!=chunk_meta_pair_end_flag;++chunk_meta_pair){
-            delete chunk_meta_pair->second;
-        }
-        delete this;
-    }
-
-};
 
 
 
@@ -237,6 +266,7 @@ public:
 	int backup_version;
 
 	wstring backup_path;
+	wstring workpath;
 
 	_int64 backup_chunk_num;
 	_int64 backup_data_size;
@@ -255,7 +285,7 @@ private:
 
 	void backup_version_init() {
 
-		if (workpath[workpath.size - 1] != L'\\') {
+		if (workpath[workpath.size() - 1] != L'\\') {
 			workpath = workpath + L'\\';
 		}
 		ifstream backup_version_stream(workpath + L"backup_version_count", ifstream::binary);
@@ -274,7 +304,7 @@ private:
 	}
 
 	void backup_version_close() {
-		if (workpath[workpath.size - 1] != L'\\') {
+		if (workpath[workpath.size() - 1] != L'\\') {
 			workpath = workpath + L'\\';
 		}
 		ofstream backup_version_stream(workpath + L"backup_version_count", ifstream::binary);
@@ -284,7 +314,7 @@ private:
 
 	void backup_recipe_stream_init() {
 
-		if (workpath[workpath.size - 1] != L'\\') {
+		if (workpath[workpath.size() - 1] != L'\\') {
 			workpath = workpath + L'\\';
 		}
 
@@ -348,14 +378,14 @@ public:
 		}
 	}
 };
-backup_recipe mine_backup_recipe;
 
-class ededups_index {
+class finger_index {
 
 public:
 
 	map<string, _int64> finger_index;
 	map<string, _int64> finger_index_buffer;
+	wstring workpath;
 
 	void finger_index_init() {
 		if (workpath[workpath.size() - 1] != L'\\') {
@@ -410,6 +440,8 @@ public:
 		for (; begin != end; ++begin) {
 			finger_index.insert(*begin);
 		}
+
+		finger_index_buffer.clear();
 	}
 	void finger_index_close() {
 		if (workpath[workpath.size() - 1] != L'\\') {
@@ -424,8 +456,8 @@ public:
 			index_stream.write(begin->first.c_str(), CHUNK_FP_SIZE);
 			index_stream.write((char*)(&begin->second), sizeof(_int64));
 		}
+		finger_index.clear();
 
 		index_stream.close();
 	}
 };
-ededups_index mine_ededups_index;

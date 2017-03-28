@@ -1,5 +1,6 @@
 #include"data_read.h"
 
+list<struct chunk*> read_list;
 
 void read_file(wstring path) {
 	struct chunk* cks = new chunk;

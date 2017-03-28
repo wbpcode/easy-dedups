@@ -1,5 +1,7 @@
 #include"data_hash.h"
 
+extern list<struct chunk*> chunk_list;
+list<struct chunk*> hash_list;
 
 void chunk_data_hash() {
 	while (TRUE) {

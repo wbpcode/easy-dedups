@@ -1,6 +1,7 @@
 #include"data_dedup.h"
 
-
+extern list<struct chunk*> hash_list;
+list<struct chunk*> dedup_list;
 
 void chunk_data_dedup() {
 	while (TRUE) {

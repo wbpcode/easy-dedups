@@ -1,23 +1,15 @@
 #include"data_write.h"
 
+extern list<struct chunk*> dedup_list;
+extern wstring workpath;
+
 container cnr;
+
+
 void chunk_data_write() {
 
 	//Get the init container id
-	if (workpath[workpath.size() - 1] != '\\') {
-		workpath += '\\';
-	}
-	ifstream container_count_stream(workpath + L"container_count", ifstream::binary);
-	container_count_stream.seekg(0, ifstream::end);
-	if (container_count_stream.tellg() > 0) {
-		char container_count_buffer[sizeof(_int64)];
-		container_count_stream.read(container_count_buffer, sizeof(_int64));
-		CONTAINER_COUNT = *(_int64*)(container_count_buffer);
-	}
-	else {
-		CONTAINER_COUNT = 0;
-	}
-	container_count_stream.close();
+	
 
 	cnr.container_init();
 	while (TRUE) {
@@ -35,7 +27,7 @@ void chunk_data_write() {
 			else {
 				assert(cnr.container_chunk_num == CONTAINER_MAX_CHUNK_NUM);
 				//Write a container and container count plus 1
-				cnr.write_container;
+				cnr.write_container();
 				//re-init container for following chunk
 				cnr.container_init();
 
@@ -67,13 +59,11 @@ void chunk_data_write() {
 	cnr.write_container();
 	cnr.container_init();
 
-	ofstream container_count_stream2(workpath + L"container_count", ofstream::binary);
-	ofstream container_count_stream2(workpath + L"container_count", ofstream::binary);
-	container_count_stream2.write((char*)(&CONTAINER_COUNT), sizeof(_int64));
+	ofstream w_container_count_stream(workpath + L"container_count", ofstream::binary);
+	w_container_count_stream.write((char*)(&CONTAINER_COUNT), sizeof(_int64));
 
 	mine_ededups_index.finger_index_update();
-	mine_ededups_index.finger_index_close();
-	mine_backup_recipe.backup_recipe_close();
+
 
 };
 
