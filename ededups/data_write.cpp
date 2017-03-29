@@ -3,7 +3,7 @@
 extern list<struct chunk*> dedup_list;
 
 extern backup_recipe mine_backup_recipe;
-extern finger_index mine_finger_index;
+extern ededups_index mine_finger_index;
 extern container_set mine_container_set;
 
 
@@ -41,6 +41,7 @@ void chunk_data_write() {
 		delete ck;
 	}
 
+	mine_container_set.write_container_set();
 	mine_finger_index.finger_index_update();
 
 

@@ -9,7 +9,7 @@ wstring workpath;
 
 container_set mine_container_set;
 backup_recipe mine_backup_recipe;
-finger_index mine_finger_index;
+ededups_index mine_finger_index;
 
 void data_backup(wstring backup_path) {
 

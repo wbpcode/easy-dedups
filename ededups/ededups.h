@@ -76,9 +76,12 @@ struct container{
 class container_set {
 public:
 	_int64 global_container_count;
-	_int64 current_container_count;
 	wstring workpath;
 	list<struct container*> container_list;
+
+	int container_size() {
+		return container_list.size();
+	}
 
 	void container_set_init(wstring path) {
 		workpath = path;
@@ -97,8 +100,6 @@ public:
 			global_container_count = 0;
 		}
 		container_count_stream.close();
-
-		current_container_count = 0;
 	}
 
 	void write_container_set() {
@@ -125,8 +126,8 @@ public:
 			for (; chunk_meta_pair != chunk_meta_pair_end_flag; ++chunk_meta_pair) {
 
 				write_container_stream.write(chunk_meta_pair->second->chunk_fp.c_str(), CHUNK_FP_SIZE);
-				write_container_stream.write((char*)(&chunk_meta_pair->second->chunk_size), sizeof(int));
-				write_container_stream.write((char*)(&chunk_meta_pair->second->chunk_offset), sizeof(int));
+				write_container_stream.write((char*)(&(chunk_meta_pair->second->chunk_size)), sizeof(int));
+				write_container_stream.write((char*)(&(chunk_meta_pair->second->chunk_offset)), sizeof(int));
 			}
 
 			write_container_stream.write(cnr->container_data.c_str(), cnr->container_size);
@@ -192,15 +193,25 @@ public:
 		;
 	}
 	void delete_container(struct container* cnr) {
+
 		auto chunk_meta_pair = cnr->container_chunk_meta_map.begin();
 		auto chunk_meta_pair_end_flag = cnr->container_chunk_meta_map.end();
 		for (; chunk_meta_pair != chunk_meta_pair_end_flag; ++chunk_meta_pair) {
 			delete chunk_meta_pair->second;
 		}
 		delete cnr;
+
 	}
 	void container_set_close() {
-		;
+		while (!container_list.empty()) {
+			auto cnr = container_list.front();
+
+			delete_container(cnr);
+
+			container_list.pop_front();
+		}
+
+		delete this;
 	}
 };
 
@@ -384,7 +395,7 @@ public:
 	}
 };
 
-class finger_index {
+class ededups_index {
 
 public:
 
