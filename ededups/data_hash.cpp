@@ -4,6 +4,7 @@ extern list<struct chunk*> chunk_list;
 list<struct chunk*> hash_list;
 
 void chunk_data_hash() {
+
 	while (TRUE) {
 		if (chunk_list.empty()) {
 			break;
@@ -15,7 +16,6 @@ void chunk_data_hash() {
 			chunk_list.pop_front();
 			continue;
 		}
-
 		ck->chunk_fp = hash_sha1(ck->chunk_data);
 		hash_list.push_back(ck);
 		chunk_list.pop_front();

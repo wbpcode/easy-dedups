@@ -11,20 +11,21 @@
 #include<windows.h>
 
 //Data chunk flag
-#define CHUNK_UNIQUE 0x0000
-#define CHUNK_DEDUP 0x0001
+#define CHUNK_INIT 0x00000000
+#define CHUNK_UNIQUE 0x00000001
+#define CHUNK_DEDUP 0x00000002
 
 /*#define CHUNK_FRAG 0x0002
 #define CHUNK_REWRITE_DENY 0x0004*/
 
 //Special chunk flag
-#define CHUNK_FILE_START 0x0100
-#define CHUNK_FILE_END 0x0200
-#define CHUNK_SEG_START 0x0400
-#define CHUNK_SEG_END 0x0800
+#define CHUNK_FILE_START 0x00000100
+#define CHUNK_FILE_END 0x00000200
+#define CHUNK_SEG_START 0x00000400
+#define CHUNK_SEG_END 0x00000800
 
 //Flag set and check
-#define SET_CHUNK(ck,flag) (ck->chunk_flag=ck->chunk_flag | flag)
+#define SET_CHUNK(ck,flag) (ck->chunk_flag = (ck->chunk_flag & CHUNK_UNIQUE) | flag)
 #define CHECK_CHUNK(ck,flag) (ck->chunk_flag & flag)
 
 //Preset value
@@ -92,6 +93,9 @@ public:
 		ifstream container_count_stream(workpath + L"container_count", ifstream::binary);
 		container_count_stream.seekg(0, ifstream::end);
 		if (container_count_stream.tellg() > 0) {
+
+			container_count_stream.seekg(0, ifstream::beg);
+
 			char container_count_buffer[sizeof(_int64)];
 			container_count_stream.read(container_count_buffer, sizeof(_int64));
 			global_container_count = *(_int64*)(container_count_buffer);
@@ -103,6 +107,7 @@ public:
 	}
 
 	void write_container_set() {
+
 		while (TRUE){
 			if (container_list.empty()){
 				break;
@@ -113,7 +118,7 @@ public:
 			wostringstream idstream;
 			idstream << cnr->container_id;
 			wstring idstring = idstream.str();
-			wstring path = workpath + L"containers/" + L"container" + idstring;
+			wstring path = workpath + L"containers\\" + L"container" + idstring;
 
 			ofstream write_container_stream(path, ofstream::binary);
 
@@ -185,6 +190,7 @@ public:
 		cnr->container_size += ck->chunk_size;
 		cnr->container_chunk_num+=1;
 		cnr->container_data = cnr->container_data + ck->chunk_data;
+		cout << cnr->container_data.size();
 	}
 	struct chunk_meta* check_chunk_in_container_set(struct chunk* ck) {
 		;
@@ -211,7 +217,12 @@ public:
 			container_list.pop_front();
 		}
 
-		delete this;
+		if (workpath[workpath.size() - 1] != '\\') {
+			workpath += '\\';
+		}
+		ofstream container_count_stream(workpath + L"container_count", ofstream::binary);
+		container_count_stream.write((char*)(&global_container_count), sizeof(_int64));
+		container_count_stream.close();
 	}
 };
 
@@ -352,7 +363,7 @@ private:
 		file_meta_buffer.seekg(0, stringstream::end);
 		buffer_size = file_meta_buffer.tellg();
 		file_meta_stream.write(file_meta_buffer.str().c_str(), buffer_size);
-		file_meta_stream.clear();
+		file_meta_buffer.clear();
 	}
 
 	void backup_recipe_stream_close() {
@@ -404,31 +415,41 @@ public:
 	wstring workpath;
 
 	void finger_index_init(wstring path) {
+
 		workpath = path;
+		finger_index.clear();
+		finger_index_buffer.clear();
 
 		if (workpath[workpath.size() - 1] != L'\\') {
 			workpath = workpath + L'\\';
 		}
 		ifstream index_stream(workpath + L"index", ifstream::binary);
-		char index_num[sizeof(_int64)];
-		index_stream.read(index_num, sizeof(_int64));
-		_int64 finger_index_num = *(_int64*)(index_num);
-		_int64 num = 0;
-		char fp_buffer[CHUNK_FP_SIZE];
-		char id_buffer[sizeof(_int64)];
-		string fp;
-		_int64 id;
-		for (; num < finger_index_num; ++num) {
-			index_stream.read(fp_buffer, CHUNK_FP_SIZE);
-			fp.assign(fp_buffer, CHUNK_FP_SIZE);
 
-			index_stream.read(id_buffer, sizeof(_int64));
-			id = *(_int64*)(id_buffer);
 
-			finger_index.insert(make_pair(fp, id));
+		index_stream.seekg(0, ifstream::end);
+		if (index_stream.tellg() > 0) {
+
+			index_stream.seekg(0, ifstream::beg);
+
+			char index_num[sizeof(_int64)];
+			index_stream.read(index_num, sizeof(_int64));
+			_int64 finger_index_num = *(_int64*)(index_num);
+			_int64 num = 0;
+			char fp_buffer[CHUNK_FP_SIZE];
+			char id_buffer[sizeof(_int64)];
+			string fp;
+			_int64 id;
+			for (; num < finger_index_num; ++num) {
+				index_stream.read(fp_buffer, CHUNK_FP_SIZE);
+				fp.assign(fp_buffer, CHUNK_FP_SIZE);
+
+				index_stream.read(id_buffer, sizeof(_int64));
+				id = *(_int64*)(id_buffer);
+
+				finger_index.insert(make_pair(fp, id));
+			}
+			assert(finger_index.size() == finger_index_num);
 		}
-		assert(finger_index.size() == finger_index_num);
-
 		index_stream.close();
 	}
 

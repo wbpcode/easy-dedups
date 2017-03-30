@@ -3,6 +3,7 @@
 list<struct chunk*> read_list;
 
 void read_file(wstring path) {
+
 	struct chunk* cks = new chunk;
 	cks->chunk_fp = TEMPORARY_FP;
 	assert(cks->chunk_fp.size() == CHUNK_FP_SIZE);
@@ -56,44 +57,43 @@ void read_file(wstring path) {
 }
 
 int find_all_file(wstring path){
+
 	if (path[path.size() - 1] != L'\\') {
 		path = path + L"\\";
 	}
+
 	WIN32_FIND_DATA fileinfo;
 	wstring search_path = path + L"*.*";
 	HANDLE findend = FindFirstFile(search_path.c_str(), &fileinfo);
-	if (findend == INVALID_HANDLE_VALUE) {
-		cerr << "NO FILE!!!" << endl;
-		return -1;
-	}
-	wstring current_file_name = fileinfo.cFileName;
-	wstring current_directory = L".";
-	wstring parent_directory = L"..";
-	if (fileinfo.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) {
-		if (current_file_name!= current_directory && current_file_name != parent_directory) {
-			find_all_file(path+current_file_name);
-		}
+
+	if (findend != INVALID_HANDLE_VALUE) {
+
+		do {
+			wstring current_file_name = fileinfo.cFileName;
+			wstring current_directory = L".";
+			wstring parent_directory = L"..";
+
+			if (fileinfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+				if (current_file_name != current_directory && current_file_name != parent_directory) {
+					find_all_file(path + current_file_name);
+				}
+			}
+			else {
+				read_file(path + current_file_name);
+			}
+
+		} while (FindNextFile(findend, &fileinfo));
 	}
 	else {
-		read_file(path+current_file_name);
-	}
-	while (FindNextFile(findend, &fileinfo)) {
-		current_file_name = fileinfo.cFileName;
-		if (fileinfo.dwFileAttributes == FILE_ATTRIBUTE_DIRECTORY) {
-			if (current_file_name != current_directory && current_file_name != parent_directory) {
-				find_all_file(path+current_file_name);
-			}
-		}
-		else {
-			read_file(path+current_file_name);
-		}
+		return -1;
 	}
 	FindClose(findend);
-	return 0;
+
+	return 1;
 }
 
 void data_read(wstring path) {
 	cout << "Reading start!!!" << endl;
 	find_all_file(path);
-	cout << "Reading end!!!";
+	cout << "Reading end!!!" << endl;
 }

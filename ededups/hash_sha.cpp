@@ -34,9 +34,9 @@ using std::hex;
 string md5_data_padding(string data) {
 	//Get padding byte number
 	unsigned _int64 data_size = data.size(); 
-	unsigned _int64 padding_size = (data_size / SUB_DATA_SIZE + 1)*SUB_DATA_SIZE - DATA_SIZE_LONG - data_size;
-	if (padding_size == 0) {
-		padding_size = SUB_DATA_SIZE;
+	unsigned _int64 padding_size = (data_size / SUB_DATA_SIZE + 2)*SUB_DATA_SIZE - DATA_SIZE_LONG - data_size;
+	if (padding_size > SUB_DATA_SIZE) {
+		padding_size -= SUB_DATA_SIZE;
 	}
 	//Prepare byte for padding(The longest padding bits are 512bits(64byte))
 	static char padding_first[] = { 0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -47,8 +47,8 @@ string md5_data_padding(string data) {
 	unsigned _int64 data_size_bit = data_size * 8;
 	char* padding_last_8 = (char*)(&data_size_bit);
 
-	//Insert and append(can do it just by one function,but here just for show how to use append and insert)
-	data.insert(data_size, &padding_first[0], padding_size);
+
+	data.append(padding_first, padding_size);
 	data.append(padding_last_8, DATA_SIZE_LONG);
 
 	return data;
@@ -170,9 +170,9 @@ string hash_md5(string data) {
 string sha1_data_padding(string data) {
 	//Get padding byte number
 	unsigned _int64 data_size = data.size();
-	unsigned _int64 padding_size = (data_size / SUB_DATA_SIZE + 1)*SUB_DATA_SIZE - DATA_SIZE_LONG - data_size;
-	if (padding_size == 0) {
-		padding_size = SUB_DATA_SIZE;
+	unsigned _int64 padding_size = (data_size / SUB_DATA_SIZE + 2)*SUB_DATA_SIZE - DATA_SIZE_LONG - data_size;
+	if (padding_size > SUB_DATA_SIZE) {
+		padding_size -= SUB_DATA_SIZE;
 	}
 	//Prepare byte for padding(The longest padding bits are 512bits(64byte))
 	static char padding_first[] = { 0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -180,8 +180,7 @@ string sha1_data_padding(string data) {
 		0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 };
 
 
-	//Insert and append(can do it just by one function,but here just for show how to use append and insert)
-	data.insert(data_size, &padding_first[0], padding_size);
+	data.append(padding_first, padding_size);
 
 	for (int last_pos = 7; last_pos >= 0; --last_pos) {
 		data.push_back((unsigned char)((data_size*8)>> (last_pos*8)));

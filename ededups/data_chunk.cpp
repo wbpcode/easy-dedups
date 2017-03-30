@@ -4,6 +4,7 @@ extern list<struct chunk*> read_list;
 list<struct chunk*> chunk_list;
 
 void data_chunk_fixed() {
+
 	while (TRUE) {
 
 		if (read_list.empty()) {
@@ -11,9 +12,11 @@ void data_chunk_fixed() {
 		}
 		struct chunk* ck = read_list.front();
 
+
 		if (CHECK_CHUNK(ck, CHUNK_FILE_START) || CHECK_CHUNK(ck, CHUNK_FILE_END)) {
 			chunk_list.push_back(ck);
 			read_list.pop_front();
+			//cout << ck->chunk_flag << endl;
 			continue;
 		}
 
@@ -37,7 +40,6 @@ void data_chunk_fixed() {
 			new_ck->container_id = TEMPORARY_ID;
 			new_ck->chunk_size = sub_data_size;
 			chunk_list.push_back(new_ck);
-
 			data_pos += sub_data_size;
 		}
 		delete ck;

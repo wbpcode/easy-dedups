@@ -5,7 +5,7 @@
 #include"data_dedup.h"
 #include"data_write.h"
 
-wstring workpath;
+wstring workpath=L"C:\\Users\\ping\\Documents\\workpath\\";
 
 container_set mine_container_set;
 backup_recipe mine_backup_recipe;
@@ -33,8 +33,8 @@ void data_backup(wstring backup_path) {
 
 
 int main(int argc, wchar_t** argv) {
-	cout << "Please input you path:";
-	wstring backup_path;
-	wcin >> backup_path;
+	wstring backup_path = L"C:\\Users\\ping\\Documents\\TomatoBox\\";
 	data_backup(backup_path);
+	wstring nihao;
+	wcin >> nihao;
 }
