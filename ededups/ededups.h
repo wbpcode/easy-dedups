@@ -25,7 +25,7 @@
 #define CHUNK_SEG_END 0x00000800
 
 //Flag set and check
-#define SET_CHUNK(ck,flag) (ck->chunk_flag = (ck->chunk_flag & CHUNK_UNIQUE) | flag)
+#define SET_CHUNK(ck,flag) (ck->chunk_flag = (ck->chunk_flag & CHUNK_INIT) | flag)
 #define CHECK_CHUNK(ck,flag) (ck->chunk_flag & flag)
 
 //Preset value
@@ -85,6 +85,7 @@ public:
 	}
 
 	void container_set_init(wstring path) {
+
 		workpath = path;
 
 		if (workpath[workpath.size() - 1] != '\\') {
@@ -109,16 +110,20 @@ public:
 	void write_container_set() {
 
 		while (TRUE){
+
 			if (container_list.empty()){
 				break;
 			}
 			auto cnr = container_list.front();
-
+			cout << cnr->container_id << endl;
 			//write data
 			wostringstream idstream;
 			idstream << cnr->container_id;
 			wstring idstring = idstream.str();
+			idstream.str(L"");
+
 			wstring path = workpath + L"containers\\" + L"container" + idstring;
+			wcout << path << endl;
 
 			ofstream write_container_stream(path, ofstream::binary);
 
@@ -137,10 +142,9 @@ public:
 
 			write_container_stream.write(cnr->container_data.c_str(), cnr->container_size);
 
-			idstream.clear();
 			write_container_stream.close();
-
 			delete_container(cnr);
+
 			container_list.pop_front();
 		}
 	}
@@ -190,7 +194,7 @@ public:
 		cnr->container_size += ck->chunk_size;
 		cnr->container_chunk_num+=1;
 		cnr->container_data = cnr->container_data + ck->chunk_data;
-		cout << cnr->container_data.size();
+		//cout << cnr->container_data.size();
 	}
 	struct chunk_meta* check_chunk_in_container_set(struct chunk* ck) {
 		;
@@ -346,11 +350,13 @@ private:
 		wostringstream backup_version_stream;
 		backup_version_stream << backup_version;
 		wstring backup_version_str = backup_version_stream.str();
-		backup_version_stream.clear();
+		backup_version_stream.str(L"");
 
 		recipe_stream.open(workpath + L"version"+backup_version_str+L'\\'+L"recipe",ofstream::binary);
 		file_meta_stream.open(workpath + L"version" + backup_version_str + L'\\' + L"filemeta", ofstream::binary);
 
+		recipe_buffer.str("");
+		file_meta_buffer.str("");
 		recipe_buffer.seekg(0, stringstream::beg);
 		file_meta_buffer.seekg(0, stringstream::beg);
 	}
@@ -358,12 +364,12 @@ private:
 		recipe_buffer.seekg(0, stringstream::end);
 		int buffer_size = recipe_buffer.tellg();
 		recipe_stream.write(recipe_buffer.str().c_str(), buffer_size);
-		recipe_buffer.clear();
+		recipe_buffer.str("");
 
 		file_meta_buffer.seekg(0, stringstream::end);
 		buffer_size = file_meta_buffer.tellg();
 		file_meta_stream.write(file_meta_buffer.str().c_str(), buffer_size);
-		file_meta_buffer.clear();
+		file_meta_buffer.str("");
 	}
 
 	void backup_recipe_stream_close() {
@@ -373,19 +379,21 @@ private:
 		recipe_stream.close();
 		file_meta_stream.close();
 
-		recipe_buffer.clear();
-		file_meta_buffer.clear();
+		recipe_buffer.str("");
+		file_meta_buffer.str("");
 	}
 
 public:
 
 	void backup_recipe_init(wstring path) {
+
 		workpath = path;
 		backup_version_init();
 		backup_recipe_stream_init();
 	}
 
 	void backup_recipe_close() {
+
 		backup_version_close();
 		backup_recipe_stream_close();
 	}
@@ -445,7 +453,6 @@ public:
 
 				index_stream.read(id_buffer, sizeof(_int64));
 				id = *(_int64*)(id_buffer);
-
 				finger_index.insert(make_pair(fp, id));
 			}
 			assert(finger_index.size() == finger_index_num);

@@ -33,7 +33,7 @@ void data_backup(wstring backup_path) {
 
 
 int main(int argc, wchar_t** argv) {
-	wstring backup_path = L"C:\\Users\\ping\\Documents\\TomatoBox\\";
+	wstring backup_path = L"C:\\Users\\ping\\Downloads\\";
 	data_backup(backup_path);
 	wstring nihao;
 	wcin >> nihao;

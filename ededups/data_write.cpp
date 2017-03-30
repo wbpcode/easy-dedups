@@ -10,8 +10,6 @@ extern container_set mine_container_set;
 
 void chunk_data_write() {
 
-	cout << dedup_list.size();
-
 	while (TRUE) {
 		if (dedup_list.empty()) {
 			break;
@@ -19,7 +17,7 @@ void chunk_data_write() {
 		struct chunk* ck = dedup_list.front();
 
 		if (CHECK_CHUNK(ck, CHUNK_UNIQUE)) {
-			cout << "jjjjj" << endl;
+
 			mine_container_set.add_chunk_to_container_set(ck);
 
 			mine_finger_index.finger_index_buffer[ck->chunk_fp]= mine_container_set.global_container_count-1;

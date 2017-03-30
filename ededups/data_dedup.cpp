@@ -2,6 +2,7 @@
 
 extern list<struct chunk*> hash_list;
 list<struct chunk*> dedup_list;
+extern ededups_index mine_ededups_index;
 
 void chunk_data_dedup() {
 	while (TRUE) {

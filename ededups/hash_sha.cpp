@@ -143,24 +143,28 @@ string hash_md5(string data) {
 		data_pos += SUB_DATA_SIZE;
 	}
 
-	static ostringstream md5_str;//reused string stream after first define
-	md5_str.width(8);
-	md5_str.fill('0');
+
+	string md5_str_end;
+	
+
 	for (auto buffer_outcome : sub_buffer) {
 		unsigned _int32 buffer_outcome_sort = { (buffer_outcome >> 24) & 0x000000ff |
 			(buffer_outcome >> 8) & 0x0000ff00 |
 			(buffer_outcome << 8) & 0x00ff0000 |
 			(buffer_outcome << 24 & 0xff000000) };
 
-		md5_str << hex << buffer_outcome_sort;
+			static ostringstream md5_str;
+			md5_str.str("");
+			md5_str.width(8);
+			md5_str.fill('0');
 
+			md5_str << hex << buffer_outcome_sort;
+			md5_str_end += md5_str.str();
+
+			md5_str.str("");
 	}
 
 	delete sub_data;
-
-	string md5_str_end = md5_str.str();
-
-	md5_str.clear();//clear for next time used
 
 	return md5_str_end;
 }
@@ -301,18 +305,24 @@ string hash_sha1(string data) {
 
 	}
 
-	static ostringstream sha1_str;//define
-	sha1_str.width(8);
-	sha1_str.fill('0');
+
+	string sha1_str_end;
+
 	for (auto buffer_outcome : sub_buffer) {
+		static ostringstream sha1_str;
+		sha1_str.str("");
+		sha1_str.width(8);
+		sha1_str.fill('0');
+
 		sha1_str << hex << buffer_outcome;
+		sha1_str_end += sha1_str.str();
+
+		sha1_str.str("");	
 	}
 
 	delete sub_data;
 
-	string sha1_str_end = sha1_str.str();
-
-	sha1_str.clear();//clear
+	//cout << sha1_str_end << endl;
 
 	return sha1_str_end;
 }
