@@ -1,4 +1,4 @@
-#include"data_write.h"
+#include"bk_write.h"
 
 extern list<struct chunk*> dedup_list;
 
@@ -31,7 +31,7 @@ void chunk_data_write() {
 			mine_backup_recipe.backup_data_size += ck->chunk_size;
 		}
 
-		ck->container_id = mine_finger_index.finger_index_buffer_check(ck);
+		ck->container_id = mine_finger_index.finger_index_check(ck);
 
 		mine_backup_recipe.backup_recipe_add(ck);
 

@@ -1,21 +1,24 @@
 #include"ededups.h"
-#include"data_read.h"
-#include"data_chunk.h"
-#include"data_hash.h"
-#include"data_dedup.h"
-#include"data_write.h"
+#include"bk_read.h"
+#include"bk_chunk.h"
+#include"bk_hash.h"
+#include"bk_dedup.h"
+#include"bk_write.h"
 
-wstring workpath=L"C:\\Users\\ping\\Documents\\workpath\\";
+wstring work_path=L"C:\\Users\\ping\\Documents\\workpath\\";
 
 container_set mine_container_set;
 backup_recipe mine_backup_recipe;
+restore_recipe mine_restore_recipe;
 ededups_index mine_finger_index;
 
 void data_backup(wstring backup_path) {
 
-	mine_backup_recipe.backup_recipe_init(workpath);
-	mine_finger_index.finger_index_init(workpath);
-	mine_container_set.container_set_init(workpath);
+
+
+	mine_backup_recipe.backup_recipe_init(work_path,backup_path);
+	mine_finger_index.finger_index_init(work_path);
+	mine_container_set.container_set_init(work_path);
 
 	cout << "Backup start!!!" << endl;
 	data_read(backup_path);
@@ -33,6 +36,13 @@ void data_backup(wstring backup_path) {
 
 
 int main(int argc, wchar_t** argv) {
+
+	if (work_path[work_path.size() - 1] != '\\') {
+		work_path += '\\';
+	}
+	CHECK_DIR(work_path);
+
+
 	wstring backup_path = L"C:\\Users\\ping\\Downloads\\";
 	data_backup(backup_path);
 	wstring nihao;

@@ -1,4 +1,4 @@
-#include"data_hash.h"
+#include"bk_hash.h"
 
 extern list<struct chunk*> chunk_list;
 list<struct chunk*> hash_list;

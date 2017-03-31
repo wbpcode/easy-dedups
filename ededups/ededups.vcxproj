@@ -139,22 +139,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="data_chunk.cpp" />
-    <ClCompile Include="data_dedup.cpp" />
-    <ClCompile Include="data_write.cpp" />
-    <ClCompile Include="data_hash.cpp" />
-    <ClCompile Include="data_read.cpp" />
+    <ClCompile Include="bk_chunk.cpp" />
+    <ClCompile Include="bk_dedup.cpp" />
+    <ClCompile Include="bk_write.cpp" />
+    <ClCompile Include="bk_hash.cpp" />
+    <ClCompile Include="bk_read.cpp" />
     <ClCompile Include="ededups.cpp" />
     <ClCompile Include="hash_sha.cpp" />
+    <ClCompile Include="restore.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="data_chunk.h" />
-    <ClInclude Include="data_dedup.h" />
-    <ClInclude Include="data_write.h" />
-    <ClInclude Include="data_hash.h" />
-    <ClInclude Include="data_read.h" />
+    <ClInclude Include="bk_chunk.h" />
+    <ClInclude Include="bk_dedup.h" />
+    <ClInclude Include="bk_write.h" />
+    <ClInclude Include="bk_hash.h" />
+    <ClInclude Include="bk_read.h" />
     <ClInclude Include="ededups.h" />
     <ClInclude Include="hash_sha.h" />
+    <ClInclude Include="restore.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -9,6 +9,7 @@
 #include<map>
 #include<cassert>
 #include<windows.h>
+#include<direct.h>
 
 //Data chunk flag
 #define CHUNK_INIT 0x00000000
@@ -36,6 +37,10 @@
 #define READ_FIXED_CHUNK_SIZE 8192
 #define CONTAINER_MAX_CHUNK_NUM 1024
 #define CONTAINER_SET_NUM 5
+
+//Special operations
+#define CHECK_DIR(path) if(_waccess(path.c_str(),00)==-1){_wmkdir(path.c_str());}
+
 
 //Common identifier
 using std::string; using std::wstring; using std::map; using std::vector; using std::list;
@@ -77,8 +82,8 @@ struct container{
 class container_set {
 public:
 	_int64 global_container_count;
-	wstring workpath;
 	list<struct container*> container_list;
+	wstring work_path;
 
 	int container_size() {
 		return container_list.size();
@@ -86,12 +91,13 @@ public:
 
 	void container_set_init(wstring path) {
 
-		workpath = path;
-
-		if (workpath[workpath.size() - 1] != '\\') {
-			workpath += '\\';
+		work_path = path;
+		if (work_path[work_path.size() - 1] != '\\') {
+			work_path += '\\';
 		}
-		ifstream container_count_stream(workpath + L"container_count", ifstream::binary);
+		CHECK_DIR(work_path);
+
+		ifstream container_count_stream(work_path + L"container_count", ifstream::binary);
 		container_count_stream.seekg(0, ifstream::end);
 		if (container_count_stream.tellg() > 0) {
 
@@ -115,17 +121,17 @@ public:
 				break;
 			}
 			auto cnr = container_list.front();
-			cout << cnr->container_id << endl;
-			//write data
+
+
 			wostringstream idstream;
 			idstream << cnr->container_id;
 			wstring idstring = idstream.str();
 			idstream.str(L"");
 
-			wstring path = workpath + L"containers\\" + L"container" + idstring;
-			wcout << path << endl;
+			wstring containers_path = work_path + L"containers\\";
+			CHECK_DIR(containers_path);
 
-			ofstream write_container_stream(path, ofstream::binary);
+			ofstream write_container_stream(containers_path + L"container" + idstring, ofstream::binary);
 
 			write_container_stream.write((char*)(&cnr->container_id), sizeof(_int64));
 			write_container_stream.write((char*)(&cnr->container_size), sizeof(int));
@@ -213,18 +219,14 @@ public:
 
 	}
 	void container_set_close() {
+
 		while (!container_list.empty()) {
 			auto cnr = container_list.front();
-
 			delete_container(cnr);
-
 			container_list.pop_front();
 		}
 
-		if (workpath[workpath.size() - 1] != '\\') {
-			workpath += '\\';
-		}
-		ofstream container_count_stream(workpath + L"container_count", ofstream::binary);
+		ofstream container_count_stream(work_path + L"container_count", ofstream::binary);
 		container_count_stream.write((char*)(&global_container_count), sizeof(_int64));
 		container_count_stream.close();
 	}
@@ -242,7 +244,7 @@ public:
 		idstream << container_id;
 		wstring idstring = idstream.str();
 
-        wstring path=workpath+L"containers/"+L"container"+idstring;
+        wstring path=work_path+L"containers/"+L"container"+idstring;
         ifstream read_container_stream(path,ifstream::binary);
 
         char id_buffer[sizeof(_int64)];
@@ -294,14 +296,14 @@ public:
 
 	int backup_version;
 
+	wstring work_path;
 	wstring backup_path;
-	wstring workpath;
 
 	_int64 backup_chunk_num;
 	_int64 backup_data_size;
-
 	_int64 backup_unique_num;
 	_int64 backup_unique_size;
+	_int64 backup_file_num;
 
 	int backup_status;
 
@@ -314,10 +316,7 @@ private:
 
 	void backup_version_init() {
 
-		if (workpath[workpath.size() - 1] != L'\\') {
-			workpath = workpath + L'\\';
-		}
-		ifstream backup_version_stream(workpath + L"backup_version_count", ifstream::binary);
+		ifstream backup_version_stream(work_path + L"backup_version_count", ifstream::binary);
 		backup_version_stream.seekg(0, ifstream::end);
 		if (backup_version_stream.tellg() > 0) {
 			backup_version_stream.seekg(0, ifstream::beg);
@@ -333,34 +332,44 @@ private:
 	}
 
 	void backup_version_close() {
-		if (workpath[workpath.size() - 1] != L'\\') {
-			workpath = workpath + L'\\';
-		}
-		ofstream backup_version_stream(workpath + L"backup_version_count", ifstream::binary);
+
+		ofstream backup_version_stream(work_path + L"backup_version_count", ifstream::binary);
 		backup_version_stream.write((char*)(&backup_version), sizeof(int));
+
 		backup_version_stream.close();
+
 	}
 
 	void backup_recipe_stream_init() {
-
-		if (workpath[workpath.size() - 1] != L'\\') {
-			workpath = workpath + L'\\';
-		}
 
 		wostringstream backup_version_stream;
 		backup_version_stream << backup_version;
 		wstring backup_version_str = backup_version_stream.str();
 		backup_version_stream.str(L"");
 
-		recipe_stream.open(workpath + L"version"+backup_version_str+L'\\'+L"recipe",ofstream::binary);
-		file_meta_stream.open(workpath + L"version" + backup_version_str + L'\\' + L"filemeta", ofstream::binary);
+		wstring recipe_path = work_path + L"version" + backup_version_str + L'\\';
+		CHECK_DIR(recipe_path);
 
-		recipe_buffer.str("");
-		file_meta_buffer.str("");
-		recipe_buffer.seekg(0, stringstream::beg);
-		file_meta_buffer.seekg(0, stringstream::beg);
+		recipe_stream.open(recipe_path + L"recipe", ofstream::binary);
+		file_meta_stream.open(recipe_path + L"filemeta", ofstream::binary);
+
+		recipe_stream.write((char*)(&backup_chunk_num), sizeof(_int64));
+		file_meta_stream.write((char*)(&backup_file_num), sizeof(_int64));
+
+
+		ofstream backup_info(recipe_path + L"backup_info", ofstream::binary);
+		int path_byte_size = WideCharToMultiByte(CP_ACP, 0, backup_path.c_str(), -1, NULL, 0, NULL, 0);
+		char *path_buffer = new char[path_byte_size];
+		WideCharToMultiByte(CP_ACP, 0, backup_path.c_str(), -1, path_buffer, path_byte_size, NULL, 0);
+		backup_info.write((char*)(&backup_version), sizeof(int));
+		backup_info.write((char*)(&path_byte_size), sizeof(int));
+		backup_info.write(path_buffer, path_byte_size);
+		backup_info.close();
+
 	}
-	void buffer_to_stream() {
+
+	void backup_recipe_stream_close() {
+
 		recipe_buffer.seekg(0, stringstream::end);
 		int buffer_size = recipe_buffer.tellg();
 		recipe_stream.write(recipe_buffer.str().c_str(), buffer_size);
@@ -370,38 +379,60 @@ private:
 		buffer_size = file_meta_buffer.tellg();
 		file_meta_stream.write(file_meta_buffer.str().c_str(), buffer_size);
 		file_meta_buffer.str("");
-	}
 
-	void backup_recipe_stream_close() {
-
-		buffer_to_stream();
+		recipe_stream.seekp(0, ofstream::beg);
+		recipe_stream.write((char*)(&backup_chunk_num), sizeof(_int64));
+		file_meta_stream.seekp(0, ofstream::beg);
+		file_meta_stream.write((char*)(&backup_file_num), sizeof(_int64));
 
 		recipe_stream.close();
 		file_meta_stream.close();
-
-		recipe_buffer.str("");
-		file_meta_buffer.str("");
 	}
 
 public:
 
-	void backup_recipe_init(wstring path) {
+	void backup_recipe_init(wstring w_path,wstring b_path) {
 
-		workpath = path;
+		work_path = w_path;
+		backup_path = b_path;
+
+		if (work_path[work_path.size() - 1] != '\\') {
+			work_path += '\\';
+		}
+		CHECK_DIR(work_path);
+		if (backup_path[backup_path.size() - 1] != '\\') {
+			backup_path += '\\';
+		}
+		CHECK_DIR(backup_path);
+
+		backup_chunk_num = 0;
+		backup_data_size = 0;
+		backup_unique_num = 0;
+		backup_unique_size = 0;
+		backup_file_num = 0;
+
 		backup_version_init();
 		backup_recipe_stream_init();
+
+
 	}
 
 	void backup_recipe_close() {
 
 		backup_version_close();
 		backup_recipe_stream_close();
+
 	}
+
 	void backup_recipe_add(struct chunk* ck) {
+
 		static int file_chunk_num;
 		if (CHECK_CHUNK(ck, CHUNK_FILE_START)) {
 			file_meta_buffer.write((char*)(&ck->chunk_size), sizeof(int));
 			file_meta_buffer.write(ck->chunk_data.c_str(), ck->chunk_size);
+
+			++backup_file_num;
+
 			file_chunk_num = 0;
 		}else if (CHECK_CHUNK(ck, CHUNK_FILE_END)) {
 			file_meta_buffer.write((char*)(&file_chunk_num), sizeof(int));
@@ -414,25 +445,50 @@ public:
 	}
 };
 
+class restore_recipe {
+public:
+	int backup_version;
+
+	wstring work_path;
+	wstring backup_path;
+	wstring restore_path;
+
+	_int64 restore_chunk_num;
+	_int64 restore_data_size;
+
+
+	int restore_status;
+	ofstream recipe_stream;
+	ofstream file_meta_stream;
+
+	void restore_recipe_init(int version,wstring w_path,wstring r_path) {
+		backup_version = version;
+		work_path = w_path;
+		wstring restore_path = r_path;
+		
+	}
+};
+
 class ededups_index {
 
 public:
 
 	map<string, _int64> finger_index;
 	map<string, _int64> finger_index_buffer;
-	wstring workpath;
+	wstring work_path;
 
 	void finger_index_init(wstring path) {
 
-		workpath = path;
+		work_path = path;
+		if (work_path[work_path.size() - 1] != '\\') {
+			work_path += '\\';
+		}
+		CHECK_DIR(work_path);
+
 		finger_index.clear();
 		finger_index_buffer.clear();
 
-		if (workpath[workpath.size() - 1] != L'\\') {
-			workpath = workpath + L'\\';
-		}
-		ifstream index_stream(workpath + L"index", ifstream::binary);
-
+		ifstream index_stream(work_path + L"index", ifstream::binary);
 
 		index_stream.seekg(0, ifstream::end);
 		if (index_stream.tellg() > 0) {
@@ -480,6 +536,29 @@ public:
 		}
 	}
 
+	_int64 finger_dedup_check(struct chunk* ck) {
+
+		auto outcome = finger_index_buffer.find(ck->chunk_fp);
+		if (outcome != finger_index_buffer.end()) {
+			SET_CHUNK(ck, CHUNK_DEDUP);
+			ck->container_id = outcome->second;
+			return outcome->second;
+		}
+		else {
+			outcome = finger_index.find(ck->chunk_fp);
+			if (outcome != finger_index.end()) {
+				SET_CHUNK(ck, CHUNK_DEDUP);
+				ck->container_id = outcome->second;
+				finger_index_buffer.insert(make_pair(ck->chunk_fp, ck->container_id));
+				return outcome->second;
+			}
+			else {
+				finger_index_buffer.insert(make_pair(ck->chunk_fp, ck->container_id));
+				return -1;
+			}
+		}
+	}
+
 	void finger_index_update() {
 		auto begin = finger_index_buffer.begin();
 		auto end = finger_index_buffer.end();
@@ -490,10 +569,8 @@ public:
 		finger_index_buffer.clear();
 	}
 	void finger_index_close() {
-		if (workpath[workpath.size() - 1] != L'\\') {
-			workpath = workpath + L'\\';
-		}
-		ofstream index_stream(workpath + L"index", ofstream::binary);
+
+		ofstream index_stream(work_path + L"index", ofstream::binary);
 		_int64 finger_index_num = finger_index.size();
 		index_stream.write((char*)(&finger_index_num), sizeof(_int64));
 		auto begin = finger_index.begin();

@@ -15,48 +15,54 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="data_chunk.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="data_dedup.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="data_hash.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="data_read.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ededups.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="hash_sha.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="data_write.cpp">
+    <ClCompile Include="bk_chunk.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bk_dedup.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bk_hash.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bk_read.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="bk_write.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="restore.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="data_chunk.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="data_dedup.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="data_hash.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="data_read.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="ededups.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bk_chunk.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bk_dedup.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bk_hash.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bk_read.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bk_write.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="hash_sha.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="data_write.h">
+    <ClInclude Include="restore.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
