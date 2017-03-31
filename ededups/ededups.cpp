@@ -14,8 +14,6 @@ ededups_index mine_finger_index;
 
 void data_backup(wstring backup_path) {
 
-
-
 	mine_backup_recipe.backup_recipe_init(work_path,backup_path);
 	mine_finger_index.finger_index_init(work_path);
 	mine_container_set.container_set_init(work_path);

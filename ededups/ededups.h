@@ -49,6 +49,27 @@ using std::stringstream; using std::istringstream; using std::ostringstream;
 using std::wistringstream; using std::wostringstream;
 using std::cout; using std::cin; using std::wcout; using std::wcin; using std::cerr; using std::endl;
 
+
+wstring string2wstring(string path) {
+	int path_size = MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, NULL, 0);
+	wchar_t* path_buffer = new wchar_t[path_size];
+	MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, path_buffer, path_size);
+	wstring newpath = path_buffer;
+	delete path_buffer;
+
+	return newpath;
+}
+
+string wstring2string(wstring path) {
+
+	int path_size = WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, NULL, 0, NULL, 0);
+	char *path_buffer = new char[path_size];
+	WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, path_buffer, path_size, NULL, 0);
+	string newpath = path_buffer;
+	delete path_buffer;
+	return newpath;
+}
+
 /*BASE DATA STUCTURE: CHUNK CHUNK_META CONTAINER*/
 struct chunk{
     string chunk_fp;
@@ -358,12 +379,13 @@ private:
 
 
 		ofstream backup_info(recipe_path + L"backup_info", ofstream::binary);
-		int path_byte_size = WideCharToMultiByte(CP_ACP, 0, backup_path.c_str(), -1, NULL, 0, NULL, 0);
-		char *path_buffer = new char[path_byte_size];
-		WideCharToMultiByte(CP_ACP, 0, backup_path.c_str(), -1, path_buffer, path_byte_size, NULL, 0);
+		
+		string muti_backup_path = wstring2string(backup_path);
+		int path_size = muti_backup_path.size();
 		backup_info.write((char*)(&backup_version), sizeof(int));
-		backup_info.write((char*)(&path_byte_size), sizeof(int));
-		backup_info.write(path_buffer, path_byte_size);
+		backup_info.write((char*)(&path_size), sizeof(int));
+		backup_info.write(muti_backup_path.c_str(), path_size);
+
 		backup_info.close();
 
 	}
@@ -446,6 +468,7 @@ public:
 };
 
 class restore_recipe {
+
 public:
 	int backup_version;
 
@@ -455,17 +478,63 @@ public:
 
 	_int64 restore_chunk_num;
 	_int64 restore_data_size;
-
+	_int64 restore_file_num;
 
 	int restore_status;
-	ofstream recipe_stream;
-	ofstream file_meta_stream;
 
-	void restore_recipe_init(int version,wstring w_path,wstring r_path) {
+	ifstream recipe_stream;
+	ifstream file_meta_stream;
+
+	void restore_recipe_init(int version, wstring w_path, wstring r_path) {
+
 		backup_version = version;
 		work_path = w_path;
 		wstring restore_path = r_path;
-		
+
+		wostringstream backup_version_stream;
+		backup_version_stream << backup_version;
+		wstring backup_version_str = backup_version_stream.str();
+		backup_version_stream.str(L"");
+
+		wstring recipe_path = work_path + L"version" + backup_version_str + L'\\';
+		CHECK_DIR(recipe_path);
+
+		ifstream restore_info(recipe_path + L"backup_info", ifstream::binary);
+
+		char buffer[sizeof(int)];
+		restore_info.read(buffer, sizeof(int));
+		int version = *(int*)buffer;
+		assert(version == backup_version);
+		restore_info.read(buffer, sizeof(int));
+		int path_size = *(int*)buffer;
+
+		char *path_buffer = new char[path_size];
+		restore_info.read(path_buffer, path_size);
+		restore_info.close();
+		string muti_backup_path;
+		muti_backup_path.assign(path_buffer, path_size);
+		delete path_buffer;
+
+		backup_path = string2wstring(muti_backup_path);
+
+		recipe_stream.open(recipe_path + L"recipe", ifstream::binary);
+		file_meta_stream.open(recipe_path + L"filemeta", ifstream::binary);
+
+		char num_buffer[sizeof(_int64)];
+		file_meta_stream.read(num_buffer, sizeof(_int64));
+		restore_file_num = *(_int64*)num_buffer;
+
+		recipe_stream.read(num_buffer, sizeof(_int64));
+		restore_chunk_num = *(_int64*)num_buffer;
+
+		restore_data_size = 0;
+	}
+
+	void restore_recipe_close() {
+
+		recipe_stream.close();
+		file_meta_stream.close();
+
 	}
 };
 

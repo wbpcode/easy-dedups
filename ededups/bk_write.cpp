@@ -31,7 +31,10 @@ void chunk_data_write() {
 			mine_backup_recipe.backup_data_size += ck->chunk_size;
 		}
 
-		ck->container_id = mine_finger_index.finger_index_check(ck);
+		ck->container_id = mine_finger_index.finger_index_buffer_check(ck);
+		if (!CHECK_CHUNK(ck, CHUNK_FILE_START) && !CHECK_CHUNK(ck, CHUNK_FILE_END)) {
+			assert(ck->container_id != TEMPORARY_ID);
+		}
 
 		mine_backup_recipe.backup_recipe_add(ck);
 

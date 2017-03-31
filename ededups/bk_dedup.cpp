@@ -11,6 +11,11 @@ void chunk_data_dedup() {
 			break;
 		}
 		struct chunk* ck=hash_list.front();
+		if (CHECK_CHUNK(ck, CHUNK_FILE_START) || CHECK_CHUNK(ck, CHUNK_FILE_END)) {
+			dedup_list.push_back(ck);
+			hash_list.pop_front();
+			continue;
+		}
 
 		mine_finger_index.finger_dedup_check(ck);
 
