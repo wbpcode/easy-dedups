@@ -1,5 +1,7 @@
-#pragma once
+﻿//#pragma once
 
+#ifndef WW
+#define WW
 #include<iostream>
 #include<fstream>
 #include<sstream>
@@ -43,6 +45,9 @@
 #define CHECK_DIR(path) if(_waccess(path.c_str(),00)==-1){_wmkdir(path.c_str());}
 
 
+
+
+
 //Common identifier
 using std::string; using std::wstring; using std::map; using std::vector; using std::list;
 using std::ifstream; using std::ofstream; using std::ios;
@@ -50,26 +55,10 @@ using std::stringstream; using std::istringstream; using std::ostringstream;
 using std::wistringstream; using std::wostringstream;
 using std::cout; using std::cin; using std::wcout; using std::wcin; using std::cerr; using std::endl;
 
+wstring string2wstring(string path);
 
-wstring string2wstring(string path) {
-	int path_size = MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, NULL, 0);
-	wchar_t* path_buffer = new wchar_t[path_size];
-	MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, path_buffer, path_size);
-	wstring newpath = path_buffer;
-	delete path_buffer;
+string wstring2string(wstring path);
 
-	return newpath;
-}
-
-string wstring2string(wstring path) {
-
-	int path_size = WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, NULL, 0, NULL, 0);
-	char *path_buffer = new char[path_size];
-	WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, path_buffer, path_size, NULL, 0);
-	string newpath = path_buffer;
-	delete path_buffer;
-	return newpath;
-}
 
 /*BASE DATA STUCTURE: CHUNK CHUNK_META CONTAINER*/
 struct chunk{
@@ -546,8 +535,8 @@ public:
 
 		char buffer[sizeof(int)];
 		restore_info.read(buffer, sizeof(int));
-		int version = *(int*)buffer;
-		assert(version == backup_version);
+		int read_version = *(int*)buffer;
+		assert(read_version == backup_version);
 		restore_info.read(buffer, sizeof(int));
 		int path_size = *(int*)buffer;
 
@@ -643,8 +632,8 @@ public:
 	}
 
 	_int64 finger_index_buffer_check(struct chunk* ck) {
-		auto outcome = finger_index.find(ck->chunk_fp);
-		if (outcome != finger_index.end()) {
+		auto outcome = finger_index_buffer.find(ck->chunk_fp);
+		if (outcome != finger_index_buffer.end()) {
 			return outcome->second;
 		}
 		else {
@@ -700,3 +689,4 @@ public:
 		index_stream.close();
 	}
 };
+#endif

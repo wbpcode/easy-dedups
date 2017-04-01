@@ -21,7 +21,9 @@ void chunk_data_write() {
 			mine_container_set.add_chunk_to_container_set(ck);
 
 			mine_finger_index.finger_index_buffer[ck->chunk_fp]= mine_container_set.global_container_count-1;
-
+			/*cout << mine_container_set.global_container_count - 1;
+			auto outcome = mine_finger_index.finger_index_buffer.find(ck->chunk_fp);
+			cout << outcome->second;*/
 			mine_backup_recipe.backup_unique_num++;
 			mine_backup_recipe.backup_unique_size += ck->chunk_size;
 		}
@@ -32,7 +34,9 @@ void chunk_data_write() {
 		}
 
 		ck->container_id = mine_finger_index.finger_index_buffer_check(ck);
+		//cout << ck->container_id;
 		if (!CHECK_CHUNK(ck, CHUNK_FILE_START) && !CHECK_CHUNK(ck, CHUNK_FILE_END)) {
+			//cout << ck->container_id;
 			assert(ck->container_id != TEMPORARY_ID);
 		}
 

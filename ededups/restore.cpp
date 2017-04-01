@@ -1,8 +1,8 @@
 #include"restore.h"
 
 
-list<chunk*> recipe_list;
-list<chunk*> restore_list;
+list<struct chunk*> recipe_list;
+list<struct chunk*> restore_list;
 extern restore_recipe mine_restore_recipe;
 extern container_set mine_container_set;
 
@@ -64,7 +64,7 @@ void restore_get_chunk() {
 		if (recipe_list.empty()) {
 			break;
 		}
-		chunk* ck = recipe_list.front();
+		struct chunk* ck = recipe_list.front();
 
 		if (CHECK_CHUNK(ck, CHUNK_FILE_START) || CHECK_CHUNK(ck, CHUNK_FILE_END)) {
 			restore_list.push_back(ck);
@@ -131,6 +131,7 @@ void restore_write_file() {
 		}
 
 		write_file_stream.write(ck->chunk_data.c_str(), ck->chunk_size);
+		mine_restore_recipe.restore_data_size += ck->chunk_size;
 
 		restore_list.pop_front();
 

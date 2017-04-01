@@ -1,5 +1,8 @@
-
-#include"hash_sha.h"
+#include<iostream>
+#include<string>
+#include<sstream>
+#include<cassert>
+#include<cmath>
 
 #define SUB_DATA_SIZE (512/8) //Byte number
 #define DATA_SIZE_LONG (64/8) 
