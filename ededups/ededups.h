@@ -131,7 +131,7 @@ public:
 				break;
 			}
 			auto cnr = container_list.front();
-
+			cout << cnr->container_id;
 
 			wostringstream idstream;
 			idstream << cnr->container_id;
@@ -143,9 +143,9 @@ public:
 
 			ofstream write_container_stream(containers_path + L"container" + idstring, ofstream::binary);
 
-			write_container_stream.write((char*)(&cnr->container_id), sizeof(_int64));
-			write_container_stream.write((char*)(&cnr->container_size), sizeof(int));
-			write_container_stream.write((char*)(&cnr->container_chunk_num), sizeof(int));
+			write_container_stream.write((char*)(&(cnr->container_id)), sizeof(_int64));
+			write_container_stream.write((char*)(&(cnr->container_size)), sizeof(int));
+			write_container_stream.write((char*)(&(cnr->container_chunk_num)), sizeof(int));
 
 			auto chunk_meta_pair = cnr->container_chunk_meta_map.begin();
 			auto chunk_meta_pair_end_flag = cnr->container_chunk_meta_map.end();
