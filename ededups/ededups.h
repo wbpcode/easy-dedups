@@ -37,6 +37,7 @@
 #define READ_FIXED_CHUNK_SIZE 8192
 #define CONTAINER_MAX_CHUNK_NUM 1024
 #define CONTAINER_SET_NUM 5
+#define CONTAINER_SET_CACHE 20
 
 //Special operations
 #define CHECK_DIR(path) if(_waccess(path.c_str(),00)==-1){_wmkdir(path.c_str());}
@@ -136,9 +137,8 @@ public:
 
 	void write_container_set() {
 
-		while (TRUE){
-
-			if (container_list.empty()){
+		while (TRUE) {
+			if (container_list.empty()) {
 				break;
 			}
 			auto cnr = container_list.front();
@@ -170,10 +170,74 @@ public:
 			write_container_stream.write(cnr->container_data.c_str(), cnr->container_size);
 
 			write_container_stream.close();
+
 			delete_container(cnr);
 
 			container_list.pop_front();
 		}
+	}
+	struct container* read_container(_int64 container_id) {
+		assert(container_id != TEMPORARY_ID);
+
+		wostringstream idstream;
+		idstream << container_id;
+		wstring idstring = idstream.str();
+		idstream.str(L"");
+
+		wstring containers_path = work_path + L"containers\\";
+		CHECK_DIR(containers_path);
+
+		ifstream read_container_stream(containers_path + L"container" + idstring, ifstream::binary);
+
+		struct container* cnr = new container;
+
+		char id_buffer[sizeof(_int64)];
+		read_container_stream.read(id_buffer, sizeof(_int64));
+		cnr->container_id == *(_int64*)id_buffer;
+		assert(cnr->container_id == container_id);
+
+		char size_buffer[sizeof(int)];
+		read_container_stream.read(size_buffer, sizeof(int));
+		cnr->container_size = *(int*)size_buffer;
+
+		char num_buffer[sizeof(int)];
+		read_container_stream.read(num_buffer, sizeof(int));
+		cnr->container_chunk_num = *(int*)num_buffer;
+
+		int num = cnr->container_chunk_num;
+		char fp_buffer[CHUNK_FP_SIZE];
+		char cksize_buffer[sizeof(int)];
+		char ckoffset_buffer[sizeof(int)];
+		for (; num > 0; --num) {
+			struct chunk_meta* ckmeta = new chunk_meta;
+			read_container_stream.read(fp_buffer, CHUNK_FP_SIZE);
+			read_container_stream.read(cksize_buffer, sizeof(int));
+			read_container_stream.read(ckoffset_buffer, sizeof(int));
+
+			ckmeta->chunk_fp.assign(fp_buffer, CHUNK_FP_SIZE);
+			ckmeta->chunk_size = *(int*)cksize_buffer;
+			ckmeta->chunk_offset = *(int*)ckoffset_buffer;
+			ckmeta->container_id = container_id;
+			ckmeta->chunk_flag = 0;
+
+			cnr->container_chunk_meta_map.insert(make_pair(ckmeta->chunk_fp, ckmeta));
+		}
+
+		char* data_buffer = new char[cnr->container_size];
+		read_container_stream.read(data_buffer, cnr->container_size);
+		cnr->container_data.assign(data_buffer, cnr->container_size);
+		delete data_buffer;
+
+
+		if (container_list.size() >= CONTAINER_SET_CACHE){
+
+			delete_container(container_list.front());
+			container_list.pop_front();
+		}
+
+		container_list.push_back(cnr);
+		return cnr;
+
 	}
 	void add_chunk_to_container_set(struct chunk* ck) {
 
@@ -223,11 +287,40 @@ public:
 		cnr->container_data = cnr->container_data + ck->chunk_data;
 		//cout << cnr->container_data.size();
 	}
-	struct chunk_meta* check_chunk_in_container_set(struct chunk* ck) {
-		;
+
+	struct container* check_container_in_set(_int64 container_id) {
+		auto begin=container_list.begin();
+		auto end = container_list.end();
+		for (; begin != end; ++begin) {
+			if ((*begin)->container_id == container_id) {
+				return *begin;
+			}
+		}
+		return NULL;
 	}
-	struct chunk* get_chunk_from_container(struct chunk* ck) {
-		;
+
+	struct chunk_meta* check_chunk_in_container_set(struct chunk* ck) {
+		auto begin=container_list.begin();
+		auto end = container_list.end();
+		for (; begin != end; ++begin) {
+			auto outcome=(*begin)->container_chunk_meta_map.find(ck->chunk_fp);
+			if (outcome != (*begin)->container_chunk_meta_map.end()) {
+				return outcome->second;
+			}
+		}
+		return NULL;
+	}
+
+	struct chunk* get_chunk_from_container_set(struct chunk* ck) {
+		assert(ck->container_id!=TEMPORARY_ID);
+		struct container* cnr = check_container_in_set(ck->container_id);
+		if (cnr == NULL) {
+			cnr = read_container(ck->container_id);
+		}
+		struct chunk_meta* ckmeta = cnr->container_chunk_meta_map.find(ck->chunk_fp)->second;
+		ck->chunk_size = ckmeta->chunk_size;
+		ck->chunk_data.assign(cnr->container_data, ckmeta->chunk_offset, ckmeta->chunk_size);
+		return ck;
 	}
 	void delete_container(struct container* cnr) {
 
@@ -252,64 +345,6 @@ public:
 		container_count_stream.close();
 	}
 };
-
-
-
-
-    
-
-    /*void read_container(_int64 id){
-
-        container_id=id;
-		wostringstream idstream;
-		idstream << container_id;
-		wstring idstring = idstream.str();
-
-        wstring path=work_path+L"containers/"+L"container"+idstring;
-        ifstream read_container_stream(path,ifstream::binary);
-
-        char id_buffer[sizeof(_int64)];
-        read_container_stream.read(id_buffer,sizeof(_int64));
-        long t_id=*(long*)(id_buffer);
-        assert(t_id==container_id);
-
-        char size_buffer[sizeof(int)];
-        read_container_stream.read(size_buffer,sizeof(int));
-        container_size=*(int*)(size_buffer);
-
-        char num_buffer[sizeof(int)];
-        read_container_stream.read(num_buffer,sizeof(int));
-        container_chunk_num=*(int*)(num_buffer);
-
-        int num=0;
-        char ckfp_buffer[CHUNK_FP_SIZE];
-        char cksize_buffer[sizeof(int)];
-        char ckoffset_buffer[sizeof(int)];
-        for(;num<container_chunk_num;++num){
-
-            struct chunk_meta* ckmeta=new chunk_meta;
-
-            read_container_stream.read(ckfp_buffer,CHUNK_FP_SIZE);
-            ckmeta->chunk_fp.assign(ckfp_buffer,CHUNK_FP_SIZE);
-
-            read_container_stream.read(cksize_buffer,sizeof(int));
-            ckmeta->chunk_size=*(int*)(cksize_buffer);
-
-            read_container_stream.read(ckoffset_buffer,sizeof(int));
-            ckmeta->chunk_offset=*(int*)(cksize_buffer);
-
-            container_chunk_meta_map.insert(make_pair(ckmeta->chunk_fp,ckmeta));
-        }
-
-        char* data_buffer=new char[container_size];
-        read_container_stream.read(data_buffer,container_size);
-        container_data.assign(data_buffer,container_size);
-        delete data_buffer;
-
-		read_container_stream.close();
-    }*/
-
-
 
 
 class backup_recipe {
@@ -489,7 +524,15 @@ public:
 
 		backup_version = version;
 		work_path = w_path;
+		if (work_path[work_path.size() - 1] != L'\\') {
+			work_path += L'\\';
+		}
+		CHECK_DIR(work_path);
 		wstring restore_path = r_path;
+		if (restore_path[restore_path.size() - 1] != L'\\') {
+			work_path += L'\\';
+		}
+		CHECK_DIR(restore_path);
 
 		wostringstream backup_version_stream;
 		backup_version_stream << backup_version;
@@ -516,6 +559,10 @@ public:
 		delete path_buffer;
 
 		backup_path = string2wstring(muti_backup_path);
+		if (backup_path[backup_path.size() - 1] != L'\\') {
+			backup_path += L'\\';
+		}
+		CHECK_DIR(backup_path);
 
 		recipe_stream.open(recipe_path + L"recipe", ifstream::binary);
 		file_meta_stream.open(recipe_path + L"filemeta", ifstream::binary);

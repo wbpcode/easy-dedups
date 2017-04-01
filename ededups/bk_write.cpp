@@ -39,6 +39,7 @@ void chunk_data_write() {
 		mine_backup_recipe.backup_recipe_add(ck);
 
 		dedup_list.pop_front();
+
 		delete ck;
 	}
 

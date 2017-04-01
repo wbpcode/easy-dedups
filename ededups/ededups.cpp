@@ -4,6 +4,7 @@
 #include"bk_hash.h"
 #include"bk_dedup.h"
 #include"bk_write.h"
+#include"restore.h"
 
 wstring work_path=L"C:\\Users\\ping\\Documents\\workpath\\";
 
@@ -32,6 +33,13 @@ void data_backup(wstring backup_path) {
 
 }
 
+void data_restore(int version, wstring restore_path) {
+	mine_restore_recipe.restore_recipe_init(version, work_path, restore_path);
+	mine_container_set.container_set_init(work_path);
+
+	cout << "Restore start!!!" << endl;
+
+}
 
 int main(int argc, wchar_t** argv) {
 

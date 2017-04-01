@@ -6,7 +6,7 @@ list<chunk*> restore_list;
 extern restore_recipe mine_restore_recipe;
 extern container_set mine_container_set;
 
-void restore_recipe_get() {
+void restore_get_recipe() {
 
 	_int64 restore_file_num = mine_restore_recipe.restore_file_num;
 	_int64 restore_chunk_num = 0;
@@ -59,7 +59,7 @@ void restore_recipe_get() {
 	}
 }
 
-void restore_chunk_get() {
+void restore_get_chunk() {
 	while (TRUE) { 
 		if (recipe_list.empty()) {
 			break;
@@ -72,8 +72,69 @@ void restore_chunk_get() {
 			continue;
 		}
 
-		mine_container_set.get_chunk_from_container(ck);
+		mine_container_set.get_chunk_from_container_set(ck);
+
+		restore_list.push_back(ck);
+
+		recipe_list.pop_front();
 		
+	}
+}
+
+void restore_write_file() {
+	const wstring restore_path = mine_restore_recipe.restore_path;
+	const wstring backup_path = mine_restore_recipe.backup_path;
+
+	int backup_path_size = backup_path.size();
+
+	ofstream write_file_stream;
+
+	while (TRUE) {
+		if (restore_list.empty()) {
+			break;
+		}
+		struct chunk* ck = restore_list.front();
+
+		if (CHECK_CHUNK(ck, CHUNK_FILE_START)) {
+			wstring backup_file_path = string2wstring(ck->chunk_data);
+			wstring tem_file_path;
+			tem_file_path.assign(backup_file_path, backup_path.size(), backup_file_path.size() - backup_path_size);
+			wstring restore_file_path = restore_path + tem_file_path;
+			wstring dir_path = restore_file_path;
+			while (TRUE) {
+				if (dir_path.back() != L'\\') {
+					dir_path.pop_back();
+				}
+				else {
+					break;
+				}
+			}
+			CHECK_DIR(dir_path);
+
+			write_file_stream.open(restore_file_path, ofstream::binary);
+			
+			restore_list.pop_front();
+
+			delete ck;
+
+			continue;
+		}
+		if (CHECK_CHUNK(ck, CHUNK_FILE_END)) {
+
+			write_file_stream.close();
+			
+			restore_list.pop_front();
+
+			delete ck;
+
+			continue;
+		}
+
+		write_file_stream.write(ck->chunk_data.c_str(), ck->chunk_size);
+
+		restore_list.pop_front();
+
+		delete ck;
 	}
 }
 
