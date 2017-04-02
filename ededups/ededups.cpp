@@ -23,6 +23,7 @@ wstring string2wstring(string path) {
 	return newpath;
 }
 
+
 string wstring2string(wstring path) {
 
 	int path_size = WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, NULL, 0, NULL, 0);
