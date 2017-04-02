@@ -101,6 +101,7 @@ void restore_write_file() {
 			tem_file_path.assign(backup_file_path, backup_path.size(), backup_file_path.size() - backup_path_size);
 			wstring restore_file_path = restore_path + tem_file_path;
 			wstring dir_path = restore_file_path;
+
 			while (TRUE) {
 				if (dir_path.back() != L'\\') {
 					dir_path.pop_back();

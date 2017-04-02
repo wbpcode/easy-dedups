@@ -80,8 +80,7 @@ int main(int argc, wchar_t** argv) {
 	wstring backup_path = L"C:\\Users\\ping\\Downloads\\";
 	wstring restore_path = L"C:\\Users\\ping\\Documents\\restore_path\\";
 
-	//data_restore(0,restore_path);
 	data_backup(backup_path);
-	wstring nihao;
-	wcin >> nihao;
+	data_restore(0,restore_path);
+
 }

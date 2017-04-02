@@ -1,7 +1,5 @@
-﻿//#pragma once
+﻿#pragma once
 
-#ifndef WW
-#define WW
 #include<iostream>
 #include<fstream>
 #include<sstream>
@@ -131,7 +129,6 @@ public:
 				break;
 			}
 			auto cnr = container_list.front();
-			cout << cnr->container_id;
 
 			wostringstream idstream;
 			idstream << cnr->container_id;
@@ -146,6 +143,7 @@ public:
 			write_container_stream.write((char*)(&(cnr->container_id)), sizeof(_int64));
 			write_container_stream.write((char*)(&(cnr->container_size)), sizeof(int));
 			write_container_stream.write((char*)(&(cnr->container_chunk_num)), sizeof(int));
+
 
 			auto chunk_meta_pair = cnr->container_chunk_meta_map.begin();
 			auto chunk_meta_pair_end_flag = cnr->container_chunk_meta_map.end();
@@ -176,13 +174,13 @@ public:
 		wstring containers_path = work_path + L"containers\\";
 		CHECK_DIR(containers_path);
 
-		ifstream read_container_stream(containers_path + L"container" + idstring, ifstream::binary);
-
 		struct container* cnr = new container;
+
+		ifstream read_container_stream(containers_path + L"container" + idstring, ifstream::binary);
 
 		char id_buffer[sizeof(_int64)];
 		read_container_stream.read(id_buffer, sizeof(_int64));
-		cnr->container_id == *(_int64*)id_buffer;
+		cnr->container_id = *(_int64*)id_buffer;
 		assert(cnr->container_id == container_id);
 
 		char size_buffer[sizeof(int)];
@@ -274,7 +272,7 @@ public:
 		cnr->container_size += ck->chunk_size;
 		cnr->container_chunk_num+=1;
 		cnr->container_data = cnr->container_data + ck->chunk_data;
-		//cout << cnr->container_data.size();
+
 	}
 
 	struct container* check_container_in_set(_int64 container_id) {
@@ -517,9 +515,9 @@ public:
 			work_path += L'\\';
 		}
 		CHECK_DIR(work_path);
-		wstring restore_path = r_path;
+		restore_path = r_path;
 		if (restore_path[restore_path.size() - 1] != L'\\') {
-			work_path += L'\\';
+			restore_path += L'\\';
 		}
 		CHECK_DIR(restore_path);
 
@@ -689,4 +687,3 @@ public:
 		index_stream.close();
 	}
 };
-#endif
