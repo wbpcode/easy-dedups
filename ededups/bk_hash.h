@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include"ededups.h"
 #include"hash_sha.h"
