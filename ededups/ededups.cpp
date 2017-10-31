@@ -14,7 +14,7 @@ restore_recipe mine_restore_recipe;
 ededups_index mine_finger_index;
 
 wstring string2wstring(string path) {
-	int path_size = MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, NULL, 0);
+	int path_size = MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, nullptr, 0);
 	wchar_t* path_buffer = new wchar_t[path_size];
 	MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, path_buffer, path_size);
 	wstring newpath = path_buffer;
@@ -26,9 +26,9 @@ wstring string2wstring(string path) {
 
 string wstring2string(wstring path) {
 
-	int path_size = WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, NULL, 0, NULL, 0);
+	int path_size = WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, nullptr, 0, nullptr, 0);
 	char *path_buffer = new char[path_size];
-	WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, path_buffer, path_size, NULL, 0);
+	WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, path_buffer, path_size, nullptr, 0);
 	string newpath = path_buffer;
 	delete path_buffer;
 	return newpath;

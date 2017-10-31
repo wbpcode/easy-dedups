@@ -60,7 +60,7 @@ void restore_get_recipe() {
 }
 
 void restore_get_chunk() {
-	while (TRUE) { 
+	while (true) { 
 		if (recipe_list.empty()) {
 			break;
 		}
@@ -89,7 +89,7 @@ void restore_write_file() {
 
 	ofstream write_file_stream;
 
-	while (TRUE) {
+	while (true) {
 		if (restore_list.empty()) {
 			break;
 		}
@@ -102,7 +102,7 @@ void restore_write_file() {
 			wstring restore_file_path = restore_path + tem_file_path;
 			wstring dir_path = restore_file_path;
 
-			while (TRUE) {
+			while (true) {
 				if (dir_path.back() != L'\\') {
 					dir_path.pop_back();
 				}

@@ -23,7 +23,7 @@
     <ProjectGuid>{20C62DE4-6ABF-44C5-B6F5-8BC09F13864B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>ededups</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

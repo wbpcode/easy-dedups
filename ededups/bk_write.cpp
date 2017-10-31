@@ -10,7 +10,7 @@ extern container_set mine_container_set;
 
 void chunk_data_write() {
 
-	while (TRUE) {
+	while (true) {
 		if (dedup_list.empty()) {
 			break;
 		}

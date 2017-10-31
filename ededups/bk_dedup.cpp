@@ -5,7 +5,7 @@ list<struct chunk*> dedup_list;
 extern ededups_index mine_finger_index;
 
 void chunk_data_dedup() {
-	while (TRUE) {
+	while (true) {
 
 		if (hash_list.empty()) {
 			break;

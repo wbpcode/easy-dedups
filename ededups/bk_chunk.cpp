@@ -5,7 +5,7 @@ list<struct chunk*> chunk_list;
 
 void data_chunk_fixed() {
 
-	while (TRUE) {
+	while (true) {
 
 		if (read_list.empty()) {
 			break;
@@ -21,7 +21,7 @@ void data_chunk_fixed() {
 		}
 
 		int data_pos = 0, data_size=ck->chunk_data.size(),sub_data_size=0;
-		while (TRUE) {
+		while (true) {
 			if (data_pos >= data_size) {
 				assert(data_pos == data_size);
 				break;

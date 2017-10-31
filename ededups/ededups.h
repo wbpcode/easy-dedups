@@ -124,7 +124,7 @@ public:
 
 	void write_container_set() {
 
-		while (TRUE) {
+		while (true) {
 			if (container_list.empty()) {
 				break;
 			}
@@ -283,7 +283,7 @@ public:
 				return *begin;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	struct chunk_meta* check_chunk_in_container_set(struct chunk* ck) {
@@ -295,13 +295,13 @@ public:
 				return outcome->second;
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 
 	struct chunk* get_chunk_from_container_set(struct chunk* ck) {
 		assert(ck->container_id!=TEMPORARY_ID);
 		struct container* cnr = check_container_in_set(ck->container_id);
-		if (cnr == NULL) {
+		if (cnr == nullptr) {
 			cnr = read_container(ck->container_id);
 		}
 		struct chunk_meta* ckmeta = cnr->container_chunk_meta_map.find(ck->chunk_fp)->second;

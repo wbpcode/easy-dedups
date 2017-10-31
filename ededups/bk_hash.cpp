@@ -5,7 +5,7 @@ list<struct chunk*> hash_list;
 
 void chunk_data_hash() {
 
-	while (TRUE) {
+	while (true) {
 		if (chunk_list.empty()) {
 			break;
 		}
