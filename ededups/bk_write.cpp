@@ -10,51 +10,51 @@ extern container_set mine_container_set;
 
 void chunk_data_write() {
 
-	while (true) {
-		if (dedup_list.empty()) {
-			break;
-		}
-		struct chunk* ck = dedup_list.front();
+    while (true) {
+        if (dedup_list.empty()) {
+            break;
+        }
+        struct chunk* ck = dedup_list.front();
 
-		if (CHECK_CHUNK(ck, CHUNK_UNIQUE)) {
+        if (CHECK_CHUNK(ck, CHUNK_UNIQUE)) {
 
-			mine_container_set.add_chunk_to_container_set(ck);
+            mine_container_set.add_chunk_to_container_set(ck);
 
-			mine_finger_index.finger_index_buffer[ck->chunk_fp]= mine_container_set.global_container_count-1;
-			/*cout << mine_container_set.global_container_count - 1;
-			auto outcome = mine_finger_index.finger_index_buffer.find(ck->chunk_fp);
-			cout << outcome->second;*/
-			mine_backup_recipe.backup_unique_num++;
-			mine_backup_recipe.backup_unique_size += ck->chunk_size;
-		}
+            mine_finger_index.finger_index_buffer[ck->chunk_fp]= mine_container_set.global_container_count-1;
+            /*cout << mine_container_set.global_container_count - 1;
+            auto outcome = mine_finger_index.finger_index_buffer.find(ck->chunk_fp);
+            cout << outcome->second;*/
+            mine_backup_recipe.backup_unique_num++;
+            mine_backup_recipe.backup_unique_size += ck->chunk_size;
+        }
 
-		if (!CHECK_CHUNK(ck, CHUNK_FILE_START) && !CHECK_CHUNK(ck, CHUNK_FILE_END)) {
-			mine_backup_recipe.backup_chunk_num++;
-			mine_backup_recipe.backup_data_size += ck->chunk_size;
-		}
+        if (!CHECK_CHUNK(ck, CHUNK_FILE_START) && !CHECK_CHUNK(ck, CHUNK_FILE_END)) {
+            mine_backup_recipe.backup_chunk_num++;
+            mine_backup_recipe.backup_data_size += ck->chunk_size;
+        }
 
-		ck->container_id = mine_finger_index.finger_index_buffer_check(ck);
-		//cout << ck->container_id;
-		if (!CHECK_CHUNK(ck, CHUNK_FILE_START) && !CHECK_CHUNK(ck, CHUNK_FILE_END)) {
-			//cout << ck->container_id;
-			assert(ck->container_id != TEMPORARY_ID);
-		}
+        ck->container_id = mine_finger_index.finger_index_buffer_check(ck);
+        //cout << ck->container_id;
+        if (!CHECK_CHUNK(ck, CHUNK_FILE_START) && !CHECK_CHUNK(ck, CHUNK_FILE_END)) {
+            //cout << ck->container_id;
+            assert(ck->container_id != TEMPORARY_ID);
+        }
 
-		mine_backup_recipe.backup_recipe_add(ck);
+        mine_backup_recipe.backup_recipe_add(ck);
 
-		dedup_list.pop_front();
+        dedup_list.pop_front();
 
-		delete ck;
-	}
+        delete ck;
+    }
 
-	mine_container_set.write_container_set();
-	mine_finger_index.finger_index_update();
+    mine_container_set.write_container_set();
+    mine_finger_index.finger_index_update();
 
 
 };
 
 void data_write() {
-	cout << "Write start!!!" << endl;
-	chunk_data_write();
-	cout << "Write end!!!" << endl;
+    cout << "Write start!!!" << endl;
+    chunk_data_write();
+    cout << "Write end!!!" << endl;
 }
