@@ -4,31 +4,37 @@
 #include"bk_hash.h"
 #include"bk_dedup.h"
 #include"bk_write.h"
+#include"manager.h"
 #include"restore.h"
+#include<windows.h>
+#include<thread>
+#include<iostream>
 
-wstring work_path=L"C:\\Users\\ping\\Documents\\workpath\\";
+using namespace std;
 
-container_set mine_container_set;
-backup_recipe mine_backup_recipe;
-restore_recipe mine_restore_recipe;
-ededups_index mine_finger_index;
+wstring work_path = L"C:/Users/ping/Documents/workpath/";
+
+manager* global_manager;
 
 wstring string2wstring(string path) {
-    int path_size = MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, nullptr, 0);
+    int path_size = MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, 
+        nullptr, 0);
     wchar_t* path_buffer = new wchar_t[path_size];
-    MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, path_buffer, path_size);
+    MultiByteToWideChar(CP_ACP, 0, path.c_str(), -1, path_buffer, 
+        path_size);
     wstring newpath = path_buffer;
     delete path_buffer;
 
     return newpath;
 }
 
-
 string wstring2string(wstring path) {
 
-    int path_size = WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, nullptr, 0, nullptr, 0);
+    int path_size = WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, 
+        nullptr, 0, nullptr, 0);
     char *path_buffer = new char[path_size];
-    WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, path_buffer, path_size, nullptr, 0);
+    WideCharToMultiByte(CP_ACP, 0, path.c_str(), -1, path_buffer, 
+        path_size, nullptr, 0);
     string newpath = path_buffer;
     delete path_buffer;
     return newpath;
@@ -36,21 +42,17 @@ string wstring2string(wstring path) {
 
 void data_backup(wstring backup_path) {
 
-    mine_backup_recipe.backup_recipe_init(work_path,backup_path);
-    mine_finger_index.finger_index_init(work_path);
-    mine_container_set.container_set_init(work_path);
+    global_manager = new manager(work_path, backup_path);
 
     cout << "Backup start!!!" << endl;
-    data_read(backup_path);
+    data_read();
     data_chunk();
     data_hash();
     data_dedup();
     data_write();
     cout << "Backup end!!!" << endl;
 
-    mine_container_set.container_set_close();
-    mine_finger_index.finger_index_close();
-    mine_backup_recipe.backup_recipe_close();
+    delete global_manager;
 
 }
 

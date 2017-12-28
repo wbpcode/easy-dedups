@@ -1,30 +1,35 @@
-﻿#include"bk_hash.h"
+﻿#include"ededups.h"
+#include"bk_hash.h"
+#include"hash_sha.h"
+#include"manager.h"
+#include<iostream>
 
-extern list<struct chunk*> chunk_list;
-list<struct chunk*> hash_list;
+using namespace std;
+
+extern manager* global_manager;
 
 void chunk_data_hash() {
-
     while (true) {
-        if (chunk_list.empty()) {
+        struct chunk* ck = global_manager->stream.get_chunk_from_chunk_list();
+        if (!ck && global_manager->stream.chunk_atomic) {
             break;
         }
-        struct chunk* ck = chunk_list.front();
+        if (!ck) { continue; }
 
         if (CHECK_CHUNK(ck, CHUNK_FILE_START) || CHECK_CHUNK(ck, CHUNK_FILE_END)) {
-            hash_list.push_back(ck);
-            chunk_list.pop_front();
+            global_manager->stream.put_chunk_to_hash_list(ck);
             continue;
         }
-        ck->chunk_fp = hash_sha1(ck->chunk_data);
-        hash_list.push_back(ck);
-        chunk_list.pop_front();
+        ck->mark = hash_sha1(ck->data);
+        global_manager->stream.put_chunk_to_hash_list(ck);
     }
 }
 
 void data_hash() {
-    cout << "Hash start!!!" << endl;
+    cout << "Hash start...................." << endl;
+    global_manager->stream.hash_atomic = false;
     chunk_data_hash();
-    cout << "Hash end!!!" << endl;
+    global_manager->stream.hash_atomic = true;
+    cout << "Hash end......................" << endl;
 }
 

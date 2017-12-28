@@ -1,90 +1,77 @@
-﻿#include"bk_read.h"
+﻿#include"ededups.h"
+#include"bk_read.h"
+#include"manager.h"
+#include<fstream>
+#include<string>
+#include<cassert>
+#include<iostream>
+#include<windows.h>
 
-list<struct chunk*> read_list;
+using namespace std;
 
+extern manager* global_manager;
 
-void read_file(wstring path) {
+void read_one_file(wstring path) {
 
-    struct chunk* cks = new chunk;
-    cks->chunk_fp = TEMPORARY_FP;
-    assert(cks->chunk_fp.size() == CHUNK_FP_SIZE);
+    chunk* cks = new chunk();
     SET_CHUNK(cks, CHUNK_FILE_START);
-
-    cks->chunk_data = wstring2string(path);
-
-    cks->chunk_size = cks->chunk_data.size();
-    cks->container_id = TEMPORARY_ID;
-    read_list.push_back(cks);
+    cks->data = wstring2string(path);
+    cks->size = cks->data.size();
+    global_manager->stream.put_chunk_to_read_list(cks);
     
     ifstream filestream(path, ifstream::binary);
     char* data_buffer = new char[READ_BLOCK_SIZE];
     while (filestream.read(data_buffer, READ_BLOCK_SIZE)) {
-        struct chunk* ck = new chunk;
-        ck->chunk_fp = TEMPORARY_FP;
-        SET_CHUNK(ck, CHUNK_UNIQUE);
-        ck->chunk_size = READ_BLOCK_SIZE;
-        ck->chunk_data.assign(data_buffer, READ_BLOCK_SIZE);
-        ck->container_id = TEMPORARY_ID;
-        read_list.push_back(ck);
+        chunk* ck = new chunk();
+        ck->size = READ_BLOCK_SIZE;
+        ck->data.assign(data_buffer, READ_BLOCK_SIZE);
+        global_manager->stream.put_chunk_to_read_list(ck);
     }
     int last_data_size = filestream.gcount();
     if (last_data_size > 0) {
-        struct chunk* ck = new chunk;
-        ck->chunk_fp = TEMPORARY_FP;
-        SET_CHUNK(ck, CHUNK_UNIQUE);
-        ck->chunk_size = last_data_size;
-        ck->chunk_data.assign(data_buffer, last_data_size);
-        ck->container_id = TEMPORARY_ID;
-        read_list.push_back(ck);
+        chunk* ck = new chunk();
+        ck->size = last_data_size;
+        ck->data.assign(data_buffer, last_data_size);
+        global_manager->stream.put_chunk_to_read_list(ck);
     }
 
     delete data_buffer;
     filestream.close();
 
-    struct chunk* cke = new chunk;
-    cke->chunk_fp = TEMPORARY_FP;
+    chunk* cke = new chunk();
     SET_CHUNK(cke, CHUNK_FILE_END);
-
-    cke->chunk_data = cks->chunk_data;
-
-    cke->chunk_size = cke->chunk_data.size();
-    cke->container_id = TEMPORARY_ID;
-    read_list.push_back(cke);
+    global_manager->stream.put_chunk_to_read_list(cke);
 }
 
-int find_all_file(wstring path) {
-
-    if (path[path.size() - 1] != L'\\') {
-        path = path + L"\\";
-    }
+void find_all_file(wstring path) {
+    if (path[path.size() - 1] != L'/') { path += L"/"; }
 
     WIN32_FIND_DATA fileinfo;
     wstring search_path = path + L"*.*";
     HANDLE findend = FindFirstFile(search_path.c_str(), &fileinfo);
 
-    if (findend != INVALID_HANDLE_VALUE) {
-        do {
-            if (fileinfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-                if (wstring(fileinfo.cFileName) != L"." && 
-                    wstring(fileinfo.cFileName) != L"..") {
-                    find_all_file(path + wstring(fileinfo.cFileName));
-                }
+    if (findend == INVALID_HANDLE_VALUE) {
+        return;
+    }
+    do {
+        if (fileinfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            if (wstring(fileinfo.cFileName) != L"." &&
+                wstring(fileinfo.cFileName) != L"..") {
+                find_all_file(path + wstring(fileinfo.cFileName));
             }
-            else {
-                read_file(path + wstring(fileinfo.cFileName));
-            }
+        }
+        else {
+            read_one_file(path + wstring(fileinfo.cFileName));
+        }
+    } while (FindNextFile(findend, &fileinfo));
 
-        } while (FindNextFile(findend, &fileinfo));
-    }
-    else {
-        return -1;
-    }
     FindClose(findend);
-    return 1;
 }
 
-void data_read(wstring path) {
-    cout << "Reading start!!!" << endl;
-    find_all_file(path);
-    cout << "Reading end!!!" << endl;
+void data_read() {
+    cout << "Reading start................." << endl;
+    global_manager->stream.read_atomic = false;
+    find_all_file(global_manager->recipe.backup_path);
+    global_manager->stream.read_atomic = true;
+    cout << "Reading end..................." << endl;
 }

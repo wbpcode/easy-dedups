@@ -33,14 +33,18 @@ using std::hex;
 string md5_data_padding(string data) {
     //Get padding byte number
     unsigned _int64 data_size = data.size(); 
-    unsigned _int64 padding_size = (data_size / SUB_DATA_SIZE + 2)*SUB_DATA_SIZE - DATA_SIZE_LONG - data_size;
+    unsigned _int64 padding_size = (data_size / SUB_DATA_SIZE + 2)*SUB_DATA_SIZE - 
+        DATA_SIZE_LONG - data_size;
+
     if (padding_size > SUB_DATA_SIZE) {
         padding_size -= SUB_DATA_SIZE;
     }
     //Prepare byte for padding(The longest padding bits are 512bits(64byte))
-    static char padding_first[] = { 0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 };
+    static char padding_first[] = 
+    { 0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 };
 
     //Prepare last 8 byte for padding
     unsigned _int64 data_size_bit = data_size * 8;
@@ -52,26 +56,35 @@ string md5_data_padding(string data) {
 
     return data;
 }
-void md5_ff(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
-    unsigned _int32 sub_sub_data, unsigned _int32 constant_parameter, unsigned _int32 ring_lshift) {
-    *sub_buffer_a = *sub_buffer_b + ring_ls((*sub_buffer_a + md5_f(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + 
-        sub_sub_data + constant_parameter), ring_lshift);
+void md5_ff(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, 
+    unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d, unsigned _int32 sub_sub_data, 
+    unsigned _int32 constant_parameter, unsigned _int32 ring_lshift) {
+
+    *sub_buffer_a = *sub_buffer_b + ring_ls((*sub_buffer_a + md5_f(*sub_buffer_b, 
+        *sub_buffer_c, *sub_buffer_d) + sub_sub_data + constant_parameter), ring_lshift);
 }
-void md5_gg(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
-    unsigned _int32 sub_sub_data, unsigned _int32 constant_parameter, unsigned _int32 ring_lshift) {
-    *sub_buffer_a = *sub_buffer_b + ring_ls((*sub_buffer_a + md5_g(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + 
-        sub_sub_data + constant_parameter), ring_lshift);
+void md5_gg(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, 
+    unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d, unsigned _int32 sub_sub_data, 
+    unsigned _int32 constant_parameter, unsigned _int32 ring_lshift) {
+
+    *sub_buffer_a = *sub_buffer_b + ring_ls((*sub_buffer_a + md5_g(*sub_buffer_b, 
+        *sub_buffer_c, *sub_buffer_d) + sub_sub_data + constant_parameter), ring_lshift);
 }
-void md5_hh(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
-    unsigned _int32 sub_sub_data, unsigned _int32 constant_parameter, unsigned _int32 ring_lshift) {
-    *sub_buffer_a = *sub_buffer_b + ring_ls((*sub_buffer_a + md5_h(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + 
-        sub_sub_data + constant_parameter), ring_lshift);
+void md5_hh(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, 
+    unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d, unsigned _int32 sub_sub_data, 
+    unsigned _int32 constant_parameter, unsigned _int32 ring_lshift) {
+
+    *sub_buffer_a = *sub_buffer_b + ring_ls((*sub_buffer_a + md5_h(*sub_buffer_b, 
+        *sub_buffer_c, *sub_buffer_d) + sub_sub_data + constant_parameter), ring_lshift);
 }
-void md5_ii(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
-    unsigned _int32 sub_sub_data, unsigned _int32 constant_parameter, unsigned _int32 ring_lshift) {
-    *sub_buffer_a = *sub_buffer_b + ring_ls((*sub_buffer_a + md5_i(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + 
-        sub_sub_data + constant_parameter), ring_lshift);
+void md5_ii(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, 
+    unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d, unsigned _int32 sub_sub_data, 
+    unsigned _int32 constant_parameter, unsigned _int32 ring_lshift) {
+
+    *sub_buffer_a = *sub_buffer_b + ring_ls((*sub_buffer_a + md5_i(*sub_buffer_b, 
+        *sub_buffer_c, *sub_buffer_d) + sub_sub_data + constant_parameter), ring_lshift);
 }
+
 string hash_md5(string data) {
     string str_data = md5_data_padding(data);
     //Prepare the end buffer
@@ -92,7 +105,8 @@ string hash_md5(string data) {
         for (; first_pos < 4; ++first_pos) {
             int second_pos = 0;
             for (; second_pos < 16; ++second_pos) {
-                constant_parameter[first_pos][second_pos] = floor(max_constant_parameter*fabs(sin(first_pos * 16 + second_pos+1)));
+                constant_parameter[first_pos][second_pos] = 
+                    floor(max_constant_parameter*fabs(sin(first_pos * 16 + second_pos+1)));
             }
         }
     }
@@ -115,26 +129,27 @@ string hash_md5(string data) {
             int sub_buffer_a = 0, sub_buffer_b = 1, sub_buffer_c = 2, sub_buffer_d = 3, temp, step_pos = 0;
             for (; step_pos < 16; ++step_pos) {
                 if (cycle_pos == 0) {
-                    md5_ff(&sub_buffer[sub_buffer_a], &sub_buffer[sub_buffer_b], &sub_buffer[sub_buffer_c], &sub_buffer[sub_buffer_d],
-                        sub_sub_data[sub_sub_data_pos_parameter[cycle_pos][step_pos]], constant_parameter[cycle_pos][step_pos],
-                        ring_lshift_parameter[cycle_pos][step_pos]);
+                    md5_ff(&sub_buffer[sub_buffer_a], &sub_buffer[sub_buffer_b], &sub_buffer[sub_buffer_c], 
+                        &sub_buffer[sub_buffer_d], sub_sub_data[sub_sub_data_pos_parameter[cycle_pos][step_pos]], 
+                        constant_parameter[cycle_pos][step_pos], ring_lshift_parameter[cycle_pos][step_pos]);
                 }
                 if (cycle_pos == 1) {
-                    md5_gg(&sub_buffer[sub_buffer_a], &sub_buffer[sub_buffer_b], &sub_buffer[sub_buffer_c], &sub_buffer[sub_buffer_d],
-                        sub_sub_data[sub_sub_data_pos_parameter[cycle_pos][step_pos]], constant_parameter[cycle_pos][step_pos],
-                        ring_lshift_parameter[cycle_pos][step_pos]);
+                    md5_gg(&sub_buffer[sub_buffer_a], &sub_buffer[sub_buffer_b], &sub_buffer[sub_buffer_c], 
+                        &sub_buffer[sub_buffer_d], sub_sub_data[sub_sub_data_pos_parameter[cycle_pos][step_pos]], 
+                        constant_parameter[cycle_pos][step_pos], ring_lshift_parameter[cycle_pos][step_pos]);
                 }
                 if (cycle_pos == 2) {
-                    md5_hh(&sub_buffer[sub_buffer_a], &sub_buffer[sub_buffer_b], &sub_buffer[sub_buffer_c], &sub_buffer[sub_buffer_d],
-                        sub_sub_data[sub_sub_data_pos_parameter[cycle_pos][step_pos]], constant_parameter[cycle_pos][step_pos],
-                        ring_lshift_parameter[cycle_pos][step_pos]);
+                    md5_hh(&sub_buffer[sub_buffer_a], &sub_buffer[sub_buffer_b], &sub_buffer[sub_buffer_c], 
+                        &sub_buffer[sub_buffer_d], sub_sub_data[sub_sub_data_pos_parameter[cycle_pos][step_pos]], 
+                        constant_parameter[cycle_pos][step_pos], ring_lshift_parameter[cycle_pos][step_pos]);
                 }
                 if (cycle_pos == 3) {
-                    md5_ii(&sub_buffer[sub_buffer_a], &sub_buffer[sub_buffer_b], &sub_buffer[sub_buffer_c], &sub_buffer[sub_buffer_d],
-                        sub_sub_data[sub_sub_data_pos_parameter[cycle_pos][step_pos]], constant_parameter[cycle_pos][step_pos],
-                        ring_lshift_parameter[cycle_pos][step_pos]);
+                    md5_ii(&sub_buffer[sub_buffer_a], &sub_buffer[sub_buffer_b], &sub_buffer[sub_buffer_c], 
+                        &sub_buffer[sub_buffer_d], sub_sub_data[sub_sub_data_pos_parameter[cycle_pos][step_pos]], 
+                        constant_parameter[cycle_pos][step_pos], ring_lshift_parameter[cycle_pos][step_pos]);
                 }
-                temp = sub_buffer_d; sub_buffer_d = sub_buffer_c; sub_buffer_c = sub_buffer_b; sub_buffer_b = sub_buffer_a; sub_buffer_a = temp;
+                temp = sub_buffer_d; sub_buffer_d = sub_buffer_c; sub_buffer_c = sub_buffer_b; 
+                sub_buffer_b = sub_buffer_a; sub_buffer_a = temp;
             }
         }
         sub_buffer[0] += sub_buffer_bk[0]; sub_buffer[1] += sub_buffer_bk[1];
@@ -173,14 +188,19 @@ string hash_md5(string data) {
 string sha1_data_padding(string data) {
     //Get padding byte number
     unsigned _int64 data_size = data.size();
-    unsigned _int64 padding_size = (data_size / SUB_DATA_SIZE + 2)*SUB_DATA_SIZE - DATA_SIZE_LONG - data_size;
+    unsigned _int64 padding_size = (data_size / SUB_DATA_SIZE + 2)*SUB_DATA_SIZE - 
+        DATA_SIZE_LONG - data_size;
+
     if (padding_size > SUB_DATA_SIZE) {
         padding_size -= SUB_DATA_SIZE;
     }
+
     //Prepare byte for padding(The longest padding bits are 512bits(64byte))
-    static char padding_first[] = { 0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 };
+    static char padding_first[] = 
+    { 0x80,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 };
 
 
     data.append(padding_first, padding_size);
@@ -194,10 +214,14 @@ string sha1_data_padding(string data) {
 
 }
 
-void sha1_ff1(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsigned _int32* sub_buffer_c,unsigned _int32* sub_buffer_d, 
-    unsigned _int32* sub_buffer_e, unsigned _int32 sub_sub_data, unsigned _int32 constant_parameter ) {
+void sha1_ff1(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, 
+    unsigned _int32* sub_buffer_c,unsigned _int32* sub_buffer_d, 
+    unsigned _int32* sub_buffer_e, unsigned _int32 sub_sub_data, 
+    unsigned _int32 constant_parameter ) {
 
-    unsigned _int32 temp = *sub_buffer_e + sha1_f1(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + ring_ls(*sub_buffer_a, 5) + sub_sub_data + constant_parameter;
+    unsigned _int32 temp = *sub_buffer_e + sha1_f1(*sub_buffer_b, 
+        *sub_buffer_c, *sub_buffer_d) + ring_ls(*sub_buffer_a, 5) + 
+        sub_sub_data + constant_parameter;
 
     *sub_buffer_e = *sub_buffer_d;
     *sub_buffer_d = *sub_buffer_c;
@@ -207,10 +231,14 @@ void sha1_ff1(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsi
     *sub_buffer_a = temp;
 }
 
-void sha1_ff2(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
-    unsigned _int32* sub_buffer_e, unsigned _int32 sub_sub_data, unsigned _int32 constant_parameter) {
+void sha1_ff2(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, 
+    unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
+    unsigned _int32* sub_buffer_e, unsigned _int32 sub_sub_data, 
+    unsigned _int32 constant_parameter) {
 
-    unsigned _int32 temp = *sub_buffer_e + sha1_f2(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + ring_ls(*sub_buffer_a, 5) + sub_sub_data + constant_parameter;
+    unsigned _int32 temp = *sub_buffer_e + sha1_f2(*sub_buffer_b, 
+        *sub_buffer_c, *sub_buffer_d) + ring_ls(*sub_buffer_a, 5) + 
+        sub_sub_data + constant_parameter;
 
     *sub_buffer_e = *sub_buffer_d; 
     *sub_buffer_d = *sub_buffer_c; 
@@ -220,10 +248,14 @@ void sha1_ff2(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsi
     *sub_buffer_a = temp;
 }
 
-void sha1_ff3(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
-    unsigned _int32* sub_buffer_e, unsigned _int32 sub_sub_data, unsigned _int32 constant_parameter) {
+void sha1_ff3(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, 
+    unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
+    unsigned _int32* sub_buffer_e, unsigned _int32 sub_sub_data, 
+    unsigned _int32 constant_parameter) {
 
-    unsigned _int32 temp = *sub_buffer_e + sha1_f3(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + ring_ls(*sub_buffer_a, 5) + sub_sub_data + constant_parameter;
+    unsigned _int32 temp = *sub_buffer_e + sha1_f3(*sub_buffer_b, 
+        *sub_buffer_c, *sub_buffer_d) + ring_ls(*sub_buffer_a, 5) + 
+        sub_sub_data + constant_parameter;
 
     *sub_buffer_e = *sub_buffer_d;
     *sub_buffer_d = *sub_buffer_c; 
@@ -232,10 +264,15 @@ void sha1_ff3(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsi
     *sub_buffer_a = temp;
 }
 
-void sha1_ff4(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
-    unsigned _int32* sub_buffer_e, unsigned _int32 sub_sub_data, unsigned _int32 constant_parameter) {
+void sha1_ff4(unsigned _int32* sub_buffer_a, unsigned _int32* sub_buffer_b, 
+    unsigned _int32* sub_buffer_c, unsigned _int32* sub_buffer_d,
+    unsigned _int32* sub_buffer_e, unsigned _int32 sub_sub_data, 
+    unsigned _int32 constant_parameter) {
 
-    unsigned _int32 temp = ring_ls(*sub_buffer_a, 5)  + sha1_f4(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + *sub_buffer_e + sub_sub_data + constant_parameter;
+    unsigned _int32 temp = ring_ls(*sub_buffer_a, 5)  + 
+        sha1_f4(*sub_buffer_b, *sub_buffer_c, *sub_buffer_d) + 
+        *sub_buffer_e + sub_sub_data + constant_parameter;
+
     *sub_buffer_e = *sub_buffer_d;
     *sub_buffer_d = *sub_buffer_c; 
     *sub_buffer_c = ring_ls(*sub_buffer_b, 30); 
@@ -257,14 +294,17 @@ string hash_sha1(string data) {
         unsigned _int32 sub_sub_data[80];
         for (int sub_sub_pos = 0; sub_sub_pos < 80; ++sub_sub_pos) {
             if (sub_sub_pos < 16) {
-                sub_sub_data[sub_sub_pos] = ((unsigned _int32)(unsigned char)sub_data[sub_sub_pos * 4] & 0xffffff)<<24 |
+                sub_sub_data[sub_sub_pos] = 
+                    ((unsigned _int32)(unsigned char)sub_data[sub_sub_pos * 4] & 0xffffff)<<24 |
                     ((unsigned _int32)(unsigned char)sub_data[sub_sub_pos * 4 + 1] & 0xffffff)<<16 |
                     ((unsigned _int32)(unsigned char)sub_data[sub_sub_pos * 4 + 2] & 0xffffff)<<8 |
                     ((unsigned _int32)(unsigned char)sub_data[sub_sub_pos * 4 + 3] & 0xffffff);
             }
             else {
-                sub_sub_data[sub_sub_pos] = data_ext(sub_sub_data[sub_sub_pos - 3],sub_sub_data[sub_sub_pos - 8],
-                    sub_sub_data[sub_sub_pos - 14],sub_sub_data[sub_sub_pos-16]);
+                sub_sub_data[sub_sub_pos] = data_ext(sub_sub_data[sub_sub_pos - 3],
+                    sub_sub_data[sub_sub_pos - 8], 
+                    sub_sub_data[sub_sub_pos - 14],
+                    sub_sub_data[sub_sub_pos-16]);
             }
         }
 
@@ -276,19 +316,23 @@ string hash_sha1(string data) {
 
         for (int step_pos = 0; step_pos < 80; ++step_pos) {
             if (step_pos < 20) {
-                sha1_ff1(&sub_buffer[0], &sub_buffer[1], &sub_buffer[2], &sub_buffer[3], &sub_buffer[4], sub_sub_data[step_pos], constant_parameter[0]);
+                sha1_ff1(&sub_buffer[0], &sub_buffer[1], &sub_buffer[2], &sub_buffer[3], 
+                    &sub_buffer[4], sub_sub_data[step_pos], constant_parameter[0]);
 
             }
             else if(step_pos<40) {
-                sha1_ff2(&sub_buffer[0], &sub_buffer[1], &sub_buffer[2], &sub_buffer[3], &sub_buffer[4], sub_sub_data[step_pos], constant_parameter[1]);
+                sha1_ff2(&sub_buffer[0], &sub_buffer[1], &sub_buffer[2], &sub_buffer[3], 
+                    &sub_buffer[4], sub_sub_data[step_pos], constant_parameter[1]);
 
             }
             else if (step_pos < 60) {
-                sha1_ff3(&sub_buffer[0], &sub_buffer[1], &sub_buffer[2], &sub_buffer[3], &sub_buffer[4], sub_sub_data[step_pos], constant_parameter[2]);
+                sha1_ff3(&sub_buffer[0], &sub_buffer[1], &sub_buffer[2], &sub_buffer[3], 
+                    &sub_buffer[4], sub_sub_data[step_pos], constant_parameter[2]);
 
             }
             else if (step_pos< 80) {
-                sha1_ff4(&sub_buffer[0], &sub_buffer[1], &sub_buffer[2], &sub_buffer[3], &sub_buffer[4], sub_sub_data[step_pos], constant_parameter[3]);
+                sha1_ff4(&sub_buffer[0], &sub_buffer[1], &sub_buffer[2], &sub_buffer[3], 
+                    &sub_buffer[4], sub_sub_data[step_pos], constant_parameter[3]);
 
             }
 

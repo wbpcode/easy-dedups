@@ -39,6 +39,12 @@
     <ClCompile Include="restore.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="data_struct.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="meta_struct.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ededups.h">
@@ -63,6 +69,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="restore.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="data_struct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="meta_struct.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="manager.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

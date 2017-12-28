@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="data_struct.cpp" />
     <ClCompile Include="bk_chunk.cpp" />
     <ClCompile Include="bk_dedup.cpp" />
     <ClCompile Include="bk_write.cpp" />
@@ -146,9 +147,11 @@
     <ClCompile Include="bk_read.cpp" />
     <ClCompile Include="ededups.cpp" />
     <ClCompile Include="hash_sha.cpp" />
+    <ClCompile Include="meta_struct.cpp" />
     <ClCompile Include="restore.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="data_struct.h" />
     <ClInclude Include="bk_chunk.h" />
     <ClInclude Include="bk_dedup.h" />
     <ClInclude Include="bk_write.h" />
@@ -156,6 +159,8 @@
     <ClInclude Include="bk_read.h" />
     <ClInclude Include="ededups.h" />
     <ClInclude Include="hash_sha.h" />
+    <ClInclude Include="manager.h" />
+    <ClInclude Include="meta_struct.h" />
     <ClInclude Include="restore.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

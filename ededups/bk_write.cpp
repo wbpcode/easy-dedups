@@ -1,60 +1,36 @@
-﻿#include"bk_write.h"
+﻿#include"ededups.h"
+#include"manager.h"
+#include"bk_write.h"
+#include<iostream>
 
-extern list<struct chunk*> dedup_list;
+using namespace std;
 
-extern backup_recipe mine_backup_recipe;
-extern ededups_index mine_finger_index;
-extern container_set mine_container_set;
-
-
+extern manager* global_manager;
 
 void chunk_data_write() {
-
     while (true) {
-        if (dedup_list.empty()) {
+        struct chunk* ck = global_manager->stream.get_chunk_from_dedup_list();
+        if (!ck && global_manager->stream.dedup_atomic) {
             break;
         }
-        struct chunk* ck = dedup_list.front();
+        if (!ck) { continue; }
 
         if (CHECK_CHUNK(ck, CHUNK_UNIQUE)) {
-
-            mine_container_set.add_chunk_to_container_set(ck);
-
-            mine_finger_index.finger_index_buffer[ck->chunk_fp]= mine_container_set.global_container_count-1;
-            /*cout << mine_container_set.global_container_count - 1;
-            auto outcome = mine_finger_index.finger_index_buffer.find(ck->chunk_fp);
-            cout << outcome->second;*/
-            mine_backup_recipe.backup_unique_num++;
-            mine_backup_recipe.backup_unique_size += ck->chunk_size;
+            global_manager->container.add_chunk_to_container(ck);
+            global_manager->index.update_id_in_buffer(ck);
         }
 
-        if (!CHECK_CHUNK(ck, CHUNK_FILE_START) && !CHECK_CHUNK(ck, CHUNK_FILE_END)) {
-            mine_backup_recipe.backup_chunk_num++;
-            mine_backup_recipe.backup_data_size += ck->chunk_size;
-        }
-
-        ck->container_id = mine_finger_index.finger_index_buffer_check(ck);
-        //cout << ck->container_id;
-        if (!CHECK_CHUNK(ck, CHUNK_FILE_START) && !CHECK_CHUNK(ck, CHUNK_FILE_END)) {
-            //cout << ck->container_id;
-            assert(ck->container_id != TEMPORARY_ID);
-        }
-
-        mine_backup_recipe.backup_recipe_add(ck);
-
-        dedup_list.pop_front();
+        global_manager->index.update_id_of_chunk(ck);
+        global_manager->recipe.add_recipe_to_stream(ck);
 
         delete ck;
     }
-
-    mine_container_set.write_container_set();
-    mine_finger_index.finger_index_update();
-
-
+    global_manager->container.write_container_to_file();
+    global_manager->index.update_mark_index();
 };
 
 void data_write() {
-    cout << "Write start!!!" << endl;
+    cout << "Write start..................." << endl;
     chunk_data_write();
-    cout << "Write end!!!" << endl;
+    cout << "Write end....................." << endl;
 }

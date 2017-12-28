@@ -1,8 +1,6 @@
 ﻿#pragma once
+#include<string>
 
-#include"ededups.h"
-
-
-void data_read(wstring path);
-int find_all_file(wstring path);
-void read_file(wstring path);
+void data_read();
+void find_all_file(std::wstring path);
+void read_one_file(std::wstring path);
