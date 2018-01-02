@@ -1,109 +1,60 @@
 ﻿#include"restore.h"
+#include"ededups.h"
+#include"manager.h"
+#include<iostream>
 
+using namespace std;
 
-list<struct chunk*> recipe_list;
-list<struct chunk*> restore_list;
-extern restore_recipe mine_restore_recipe;
-extern container_manager mine_container_set;
+extern manager* global_manager;
 
-void restore_get_recipe() {
-
-    _int64 restore_file_num = mine_restore_recipe.restore_file_num;
-    _int64 restore_chunk_num = 0;
-    for(;restore_file_num>0;--restore_file_num){
-
-        chunk* cks = new chunk;
-        char num_buffer[sizeof(int)];
-        mine_restore_recipe.file_meta_stream.read(num_buffer, sizeof(int));
-        int path_size = *(int*)num_buffer;
-        char* path_buffer = new char[path_size];
-        mine_restore_recipe.file_meta_stream.read(path_buffer, path_size);
-
-        cks->mark = TEMP_FP;
-        SET_CHUNK(cks, CHUNK_FILE_START);
-        cks->chunk_data.assign(path_buffer, path_size);
-        delete path_buffer;
-        cks->size = cks->chunk_data.size();
-        assert(cks->size == path_size);
-        cks->id = TEMP_ID;
-        recipe_list.push_back(cks);
-
-        mine_restore_recipe.file_meta_stream.read(num_buffer, sizeof(int));
-        int file_chunk_num = *(int*)num_buffer;
-
-        char fp_buffer[FP_SIZE];
-        char id_buffer[sizeof(_int64)];
-        for (; file_chunk_num > 0; --file_chunk_num) {
-            chunk* ck = new chunk;
-
-            mine_restore_recipe.recipe_stream.read(fp_buffer, FP_SIZE);
-            mine_restore_recipe.recipe_stream.read(id_buffer, sizeof(_int64));
-
-            ck->mark.assign(fp_buffer, FP_SIZE);
-            SET_CHUNK(ck, CHUNK_INIT);
-            ck->chunk_data = "";
-            ck->size = 0;
-            ck->id = *(_int64*)id_buffer;
-            recipe_list.push_back(ck);
-
-            ++restore_chunk_num;
+void get_restore_recipe() {
+    global_manager->stream.read_atomic = false;
+    while (true) {
+        chunk* ck = new chunk();
+        chunk* ckt = global_manager->recipe.get_recipe_from_stream(ck);
+        if (ckt) {
+            global_manager->stream.put_chunk_to_read_list(ck);
         }
-
-        chunk* cke = new chunk;
-        cke->mark = TEMP_FP;
-        SET_CHUNK(cke, CHUNK_FILE_END);
-        cke->chunk_data = cks->chunk_data;
-        cke->size = cks->size;
-        cke->id = TEMP_ID;
-        recipe_list.push_back(cke);
-    }
-}
-
-void restore_get_chunk() {
-    while (true) { 
-        if (recipe_list.empty()) {
+        else {
+            delete ck;
             break;
         }
-        struct chunk* ck = recipe_list.front();
+    }
+    global_manager->stream.read_atomic = true;
+}
+
+void get_restore_chunk() {
+    global_manager->stream.chunk_atomic = false;
+    while (true) { 
+        chunk* ck = global_manager->stream.get_chunk_from_read_list();
+        if (!ck && global_manager->stream.read_atomic == true) {
+            break;
+        }
 
         if (CHECK_CHUNK(ck, CHUNK_FILE_START) || CHECK_CHUNK(ck, CHUNK_FILE_END)) {
-            restore_list.push_back(ck);
-            recipe_list.pop_front();
+            global_manager->stream.put_chunk_to_chunk_list(ck);
             continue;
         }
 
-        mine_container_set.get_chunk_from_container_set(ck);
-
-        restore_list.push_back(ck);
-
-        recipe_list.pop_front();
-        
+        global_manager->container.get_chunk_from_container(ck);
+        global_manager->stream.put_chunk_to_chunk_list(ck);      
     }
+    global_manager->stream.chunk_atomic = true;
 }
 
-void restore_write_file() {
-    const wstring restore_path = mine_restore_recipe.restore_path;
-    const wstring backup_path = mine_restore_recipe.backup_path;
-
-    int backup_path_size = backup_path.size();
-
+void write_restore_file() {
     ofstream write_file_stream;
-
     while (true) {
-        if (restore_list.empty()) {
+        chunk* ck = global_manager->stream.get_chunk_from_chunk_list();
+        if (!ck && global_manager->stream.chunk_atomic == true) {
             break;
         }
-        struct chunk* ck = restore_list.front();
-
+        if (!ck) { continue; }
         if (CHECK_CHUNK(ck, CHUNK_FILE_START)) {
-            wstring backup_file_path = string2wstring(ck->chunk_data);
-            wstring tem_file_path;
-            tem_file_path.assign(backup_file_path, backup_path.size(), backup_file_path.size() - backup_path_size);
-            wstring restore_file_path = restore_path + tem_file_path;
-            wstring dir_path = restore_file_path;
-
+            wstring file_path = string2wstring(ck->data);
+            wstring dir_path = file_path;
             while (true) {
-                if (dir_path.back() != L'\\') {
+                if (dir_path.back() != L'/') {
                     dir_path.pop_back();
                 }
                 else {
@@ -111,30 +62,20 @@ void restore_write_file() {
                 }
             }
             CHECK_DIR(dir_path);
-
-            write_file_stream.open(restore_file_path, ofstream::binary);
-            
-            restore_list.pop_front();
+            write_file_stream.open(file_path, ofstream::binary);
 
             delete ck;
-
             continue;
         }
         if (CHECK_CHUNK(ck, CHUNK_FILE_END)) {
-
             write_file_stream.close();
-            
-            restore_list.pop_front();
 
             delete ck;
-
             continue;
         }
 
-        write_file_stream.write(ck->chunk_data.c_str(), ck->size);
-        mine_restore_recipe.restore_data_size += ck->size;
-
-        restore_list.pop_front();
+        write_file_stream.write(ck->data.c_str(), ck->size);
+        global_manager->recipe.data_size += ck->size;
 
         delete ck;
     }

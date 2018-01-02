@@ -288,7 +288,7 @@ void index_manager::insert_mark_to_buffer(chunk* ck) {
     buffer_mutex.unlock();
 }
 
-void index_manager::mark_dedup_check(struct chunk* ck) {
+void index_manager::mark_dedup_check(chunk* ck) {
     if (CHECK_CHUNK(ck, CHUNK_FILE_START) || 
         CHECK_CHUNK(ck, CHUNK_FILE_END)) {
         return;
@@ -307,7 +307,7 @@ void index_manager::mark_dedup_check(struct chunk* ck) {
 
     index_mutex.lock();
     auto index_res = mark_index.find(ck->mark);
-    if (buffer_res!=mark_index.end()) {
+    if (index_res != mark_index.end()) {
         SET_CHUNK(ck, CHUNK_DEDUP);
         ck->id = index_res->second;
         insert_mark_to_buffer(ck);

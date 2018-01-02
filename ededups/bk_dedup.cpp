@@ -10,7 +10,7 @@ extern manager* global_manager;
 void chunk_data_dedup() {
     while (true) {
         chunk* ck = global_manager->stream.get_chunk_from_hash_list();
-        if (!ck && global_manager->stream.hash_atomic) {
+        if (!ck && global_manager->stream.hash_atomic == true) {
             break;
         }
         if (!ck) { continue; }
@@ -21,13 +21,14 @@ void chunk_data_dedup() {
         }
 
         global_manager->index.mark_dedup_check(ck);
+        global_manager->stream.put_chunk_to_dedup_list(ck);
     }
 }
 
 void data_dedup() {
-    cout << "Dedup start..................." << endl;
     global_manager->stream.dedup_atomic = false;
+    cout << "Dedup start..................." << endl;
     chunk_data_dedup();
-    global_manager->stream.dedup_atomic = true;
     cout << "Dedup end....................." << endl;
+    global_manager->stream.dedup_atomic = true;
 }

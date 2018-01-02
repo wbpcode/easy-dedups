@@ -10,8 +10,8 @@ extern manager* global_manager;
 
 void chunk_data_hash() {
     while (true) {
-        struct chunk* ck = global_manager->stream.get_chunk_from_chunk_list();
-        if (!ck && global_manager->stream.chunk_atomic) {
+        chunk* ck = global_manager->stream.get_chunk_from_chunk_list();
+        if (!ck && global_manager->stream.chunk_atomic == true) {
             break;
         }
         if (!ck) { continue; }
@@ -26,10 +26,10 @@ void chunk_data_hash() {
 }
 
 void data_hash() {
-    cout << "Hash start...................." << endl;
     global_manager->stream.hash_atomic = false;
+    cout << "Hash start...................." << endl;
     chunk_data_hash();
-    global_manager->stream.hash_atomic = true;
     cout << "Hash end......................" << endl;
+    global_manager->stream.hash_atomic = true;
 }
 

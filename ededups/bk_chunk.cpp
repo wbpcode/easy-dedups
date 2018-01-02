@@ -13,7 +13,7 @@ void data_chunk_fixed() {
     while (true) {
         chunk* ck = global_manager->stream.get_chunk_from_read_list();
 
-        if (!ck && global_manager->stream.read_atomic) {
+        if (!ck && global_manager->stream.read_atomic == true) {
             break;
         }
         if (!ck) { continue; }
@@ -43,9 +43,9 @@ void data_chunk_fixed() {
 }
 
 void data_chunk() {
-    cout << "Chunking start................" << endl;
     global_manager->stream.chunk_atomic = false;
+    cout << "Chunking start................" << endl;
     data_chunk_fixed();
-    global_manager->stream.chunk_atomic = true;
     cout << "Chunking end.................." << endl;
+    global_manager->stream.chunk_atomic = true;
 }

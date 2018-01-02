@@ -12,7 +12,7 @@
 
 using namespace std;
 
-wstring work_path = L"C:/Users/ping/Documents/workpath/";
+wstring work_path = L"C:/Users/ping/Documents/work_path/";
 
 manager* global_manager;
 
@@ -44,13 +44,21 @@ void data_backup(wstring backup_path) {
 
     global_manager = new manager(work_path, backup_path);
 
-    cout << "Backup start!!!" << endl;
-    data_read();
-    data_chunk();
-    data_hash();
-    data_dedup();
-    data_write();
-    cout << "Backup end!!!" << endl;
+    cout << "Backup start.................." << endl;
+
+    thread read_thread(data_read);
+    thread chunk_thread(data_chunk);
+    thread hash_thread(data_hash);
+    thread dedup_thread(data_dedup);
+    thread write_thread(data_write);
+
+    read_thread.join();
+    chunk_thread.join();
+    hash_thread.join();
+    dedup_thread.join();
+    write_thread.join();
+
+    cout << "Backup end...................." << endl;
 
     delete global_manager;
 
@@ -58,32 +66,36 @@ void data_backup(wstring backup_path) {
 
 void data_restore(int version, wstring restore_path) {
 
-    mine_restore_recipe.restore_recipe_init(version, work_path, restore_path);
-    mine_container_set.container_set_init(work_path);
+    global_manager = new manager(version, work_path, restore_path);
 
-    cout << "Restore start!!!" << endl;
-    restore_get_recipe();
-    restore_get_chunk();
-    restore_write_file();
-    cout << "Restore end!!!" << endl;
+    cout << "Restore start................." << endl;
+    thread recipe_thread(get_restore_recipe);
+    thread chunk_thread(get_restore_chunk);
+    thread write_thread(write_restore_file);
+    
+    recipe_thread.join();
+    chunk_thread.join();
+    write_thread.join();
 
-    mine_restore_recipe.restore_recipe_close();
-    mine_container_set.container_set_close();
+    cout << "Restore end..................." << endl;
+
+    delete global_manager;
 
 }
 
 int main(int argc, wchar_t** argv) {
 
-    if (work_path[work_path.size() - 1] != '\\') {
-        work_path += '\\';
+    if (work_path[work_path.size() - 1] != L'/') {
+        work_path += L'/';
     }
     CHECK_DIR(work_path);
 
 
-    wstring backup_path = L"C:\\Users\\ping\\Downloads\\";
-    wstring restore_path = L"C:\\Users\\ping\\Documents\\restore_path\\";
+    wstring backup_path = L"C:/Users/ping/Downloads/";
+    wstring restore_path = L"C:/Users/ping/Documents/restore_path/";
 
-    data_backup(backup_path);
-    data_restore(0,restore_path);
+    //data_backup(backup_path);
+    data_restore(1,restore_path);
+    system("pause");
 
 }

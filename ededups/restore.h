@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include"ededups.h"
-
-void restore_get_recipe();
-void restore_get_chunk();
-void restore_write_file();
+void get_restore_recipe();
+void get_restore_chunk();
+void write_restore_file();

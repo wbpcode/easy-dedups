@@ -12,7 +12,6 @@ using namespace std;
 extern manager* global_manager;
 
 void read_one_file(wstring path) {
-
     chunk* cks = new chunk();
     SET_CHUNK(cks, CHUNK_FILE_START);
     cks->data = wstring2string(path);
@@ -69,9 +68,9 @@ void find_all_file(wstring path) {
 }
 
 void data_read() {
-    cout << "Reading start................." << endl;
     global_manager->stream.read_atomic = false;
+    cout << "Reading start................." << endl;
     find_all_file(global_manager->recipe.backup_path);
-    global_manager->stream.read_atomic = true;
     cout << "Reading end..................." << endl;
+    global_manager->stream.read_atomic = true;
 }

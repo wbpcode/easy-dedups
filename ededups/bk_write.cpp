@@ -10,7 +10,7 @@ extern manager* global_manager;
 void chunk_data_write() {
     while (true) {
         struct chunk* ck = global_manager->stream.get_chunk_from_dedup_list();
-        if (!ck && global_manager->stream.dedup_atomic) {
+        if (!ck && global_manager->stream.dedup_atomic == true) {
             break;
         }
         if (!ck) { continue; }

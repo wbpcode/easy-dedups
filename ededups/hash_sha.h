@@ -1,4 +1,6 @@
 ﻿#pragma once
 
-string hash_sha1(string data);
-string hash_md5(string data);
+#include<string>
+
+std::string hash_sha1(std::string data);
+std::string hash_md5(std::string data);
